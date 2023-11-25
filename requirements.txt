@@ -1,2 +1,4 @@
-pyboy
+pyboy==1.6.9
 basic-pitch
+python-dotenv
+pytube==15.0.0
