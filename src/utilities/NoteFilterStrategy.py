@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from pretty_midi.pretty_midi import Note
 from math import ceil, floor
 
+
 class NoteFilterStrategy(ABC):
     """
     A class that is responsible for filtering ordered (by onset) pretty midi note lists based on some criteria
@@ -77,6 +78,9 @@ class TopNVelocityStrategy(NoteFilterStrategy):
         # create deep copy of list
         notes_copy = notes.copy()
 
+        # filtered list
+        filtered_list = []
+
         # iterate over each second
         for i in range(num_seconds):
 
@@ -84,6 +88,23 @@ class TopNVelocityStrategy(NoteFilterStrategy):
             j = 0
             while floor(notes_copy[j].start) == i:
                 j += 1
+
+            sub_list = []
+            for k in range(j):
+                sub_list += notes_copy.pop(0)
+
+            # append sublist to filteed list
+            if len(sub_list) <= self.__top_n:
+                filtered_list += sub_list
+            else:
+                # filtering needed
+                # sort by velocity
+                sorted_by_vel_n = sorted(sub_list, key=lambda note: note.velocity, reverse=True)[:self.__top_n]
+                sorted_by_start = sorted(sorted_by_vel_n, key=lambda note: note.start, reverse=False)
+                filtered_list += sorted_by_start
+
+        return filtered_list
+
 
 
 
