@@ -1,4 +1,4 @@
-from Pitch import Pitch
+from src.utilities.Pitch import Pitch
 from pyboy import WindowEvent
 
 class PitchControl:

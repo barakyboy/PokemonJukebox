@@ -1,6 +1,6 @@
 from pretty_midi.pretty_midi import Note
 from math import floor
-from Pitch import Pitch
+from src.utilities.Pitch import Pitch
 
 
 class FrameConverter:
@@ -11,7 +11,7 @@ class FrameConverter:
     FPS = 60
     NOTES_IN_OCTAVE = 12
 
-    def convert_notes_to_frames(self, notes: list[Note]) -> list(tuple):
+    def convert_notes_to_frames(self, notes: list[Note]) -> list:
         """
         Takes an ordered (by onset) list of prettymidi notes and returns a list of 2-tuples, with
         each tuple representing the frame representing the note onset (starting from 0), and the pitch class

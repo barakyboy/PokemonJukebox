@@ -5,6 +5,9 @@ import os
 from pytube import YouTube
 from basic_pitch.inference import predict
 from basic_pitch import ICASSP_2022_MODEL_PATH
+from src.utilities.NoteFilterStrategy import TopNVelocityStrategy
+from src.utilities.FrameConverter import FrameConverter
+from src.utilities.PitchControls import PitchControl
 
 
 load_dotenv()
@@ -30,11 +33,38 @@ mp3_path = os.path.abspath(mp3_path)
 # analyse
 model_output, midi_data, note_events = predict(mp3_path)
 
+# process notes
 notes = midi_data.instruments[0].notes
+filtered_notes = TopNVelocityStrategy().filter_notes(notes)
+framed_notes = FrameConverter().convert_notes_to_frames(filtered_notes)
 
+if len(framed_notes) == 0:
+    raise ValueError("No notes registered by AI")
+
+# get current note data
+curr = framed_notes.pop(0)
 
 # instantiate game
 with PyBoy(GAME_PATH) as pyboy:
-    while not pyboy.tick():
-        pass
+
+    frame_num = 0
+    pitch_controller = PitchControl()
+    # game loop
+    while (not pyboy.tick()) and (curr is not None) and (len(framed_notes) != 0):
+
+        # check if there is an event on this frame
+        if curr[0] == frame_num:
+
+            # there is an event on this frame, execute it
+            event = pitch_controller(curr[1])
+            pyboy.send_input(event)
+
+            # reset curr to None
+            curr = framed_notes.pop(0)
+
+        # increment frame num
+        frame_num += 1
+
+
+
 

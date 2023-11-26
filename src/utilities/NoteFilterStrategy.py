@@ -86,14 +86,14 @@ class TopNVelocityStrategy(NoteFilterStrategy):
 
             # get sublist within that second
             j = 0
-            while floor(notes_copy[j].start) == i:
+            while (len(notes_copy) != 0) and (floor(notes_copy[j].start) == i):
                 j += 1
 
             sub_list = []
             for k in range(j):
-                sub_list += notes_copy.pop(0)
+                sub_list.append(notes_copy.pop(0))
 
-            # append sublist to filteed list
+            # append sublist to filtered list
             if len(sub_list) <= self.__top_n:
                 filtered_list += sub_list
             else:
