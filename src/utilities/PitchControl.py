@@ -1,6 +1,7 @@
 from src.utilities.Pitch import Pitch
 from pyboy import WindowEvent
 
+
 class PitchControl:
     """
     A class that maps a pitch class to a pyboy window event

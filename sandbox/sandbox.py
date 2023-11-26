@@ -52,12 +52,14 @@ with PyBoy(GAME_PATH) as pyboy:
 
     # deal with frame 0
     if curr[0] == frame_num:
+
         # there is an event on this frame, execute it
         event = pitch_controller.get_control(curr[1])
         pyboy.send_input(event)
 
         # get next input
         if len(framed_notes) == 0:
+            pyboy.tick()
             exit()  # end program
 
         curr = framed_notes.pop(0)
@@ -76,7 +78,9 @@ with PyBoy(GAME_PATH) as pyboy:
 
             # get next input
             if len(framed_notes) == 0:
+                pyboy.tick()
                 exit()  # end program
+
             curr = framed_notes.pop(0)
 
         # increment frame num
