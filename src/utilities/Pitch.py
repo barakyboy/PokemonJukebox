@@ -3,6 +3,9 @@ from enum import Enum
 
 
 class Pitch(Enum):
+    """
+    A class that represents a pitch class
+    """
     C = 0
     CSharp = 1
     D = 2

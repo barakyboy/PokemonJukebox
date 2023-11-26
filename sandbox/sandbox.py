@@ -30,12 +30,11 @@ mp3_path = os.path.abspath(mp3_path)
 # analyse
 model_output, midi_data, note_events = predict(mp3_path)
 
-midi_data.instruments[0].notes
+notes = midi_data.instruments[0].notes
 
 
 # instantiate game
-# with PyBoy(GAME_PATH) as pyboy:
-#     while not pyboy.tick():
-#         pass
+with PyBoy(GAME_PATH) as pyboy:
+    while not pyboy.tick():
+        pass
 
-# model_output, midi_data, note_events = predict()
