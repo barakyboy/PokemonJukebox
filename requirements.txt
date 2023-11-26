@@ -4,3 +4,5 @@ python-dotenv==1.0.0
 pytube==15.0.0
 librosa==0.9.1
 pretty_midi==0.2.10
+pydub==0.25.1
+PyAudio==0.2.14

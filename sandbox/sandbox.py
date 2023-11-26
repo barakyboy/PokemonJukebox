@@ -8,8 +8,11 @@ from basic_pitch import ICASSP_2022_MODEL_PATH
 from src.utilities.NoteFilterStrategy import TopNVelocityStrategy
 from src.utilities.FrameConverter import FrameConverter
 from src.utilities.PitchControl import PitchControl
+from pydub import AudioSegment
+from pydub.playback import play
+import threading
 
-
+# initialise controls dictionary
 release_dict = dict()
 release_dict[WindowEvent.PRESS_ARROW_UP] = WindowEvent.RELEASE_ARROW_UP
 release_dict[WindowEvent.PRESS_ARROW_DOWN] = WindowEvent.RELEASE_ARROW_DOWN
@@ -24,7 +27,7 @@ release_dict[WindowEvent.PRESS_BUTTON_B] = WindowEvent.RELEASE_BUTTON_B
 load_dotenv()
 GAME_PATH = os.getenv('GAME_PATH')
 
-yt = YouTube('https://www.youtube.com/watch?v=NTa6Xbzfq1U&ab_channel=ultragamemusic')
+yt = YouTube('https://www.youtube.com/watch?v=R4D_12tRenQ&ab_channel=NerosCinema2')
 video = yt.streams.filter(only_audio=True).first()
 
 # set up path
@@ -55,8 +58,13 @@ if len(framed_notes) == 0:
 # get current note data
 curr = framed_notes.pop(0)
 
+sound = AudioSegment.from_file(mp3_path, format="mp4")
+t = threading.Thread(target=play, args=(sound,))
+
+
 # instantiate game
 with PyBoy(GAME_PATH) as pyboy:
+    t.start()
 
     frame_num = 0
     pitch_controller = PitchControl()
