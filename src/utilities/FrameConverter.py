@@ -21,10 +21,11 @@ class FrameConverter:
         :param notes: a list of ordered (by onset) pretty_midi notes
         :return:  a list of 2-tuples, with
         each tuple representing the frame representing the note onset (starting from 0), and the pitch class
-        of the note(i.e, of the form (frame, pitch))
+        of the note(i.e, of the form (frame, pitch)). Events will be at least two frames apart to allow for key release
         """
 
-        framed_list = [(floor(note.start * self.FPS), Pitch(note.pitch % self.NOTES_IN_OCTAVE)) for note in notes]
+        framed_list = [((floor(note.start * self.FPS/2) * 2), Pitch(note.pitch % self.NOTES_IN_OCTAVE))
+                       for note in notes]
 
 
          # remove notes that occur on the same frame

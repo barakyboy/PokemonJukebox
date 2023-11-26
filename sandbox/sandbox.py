@@ -10,6 +10,17 @@ from src.utilities.FrameConverter import FrameConverter
 from src.utilities.PitchControl import PitchControl
 
 
+release_dict = dict()
+release_dict[WindowEvent.PRESS_ARROW_UP] = WindowEvent.RELEASE_ARROW_UP
+release_dict[WindowEvent.PRESS_ARROW_DOWN] = WindowEvent.RELEASE_ARROW_DOWN
+release_dict[WindowEvent.PRESS_ARROW_LEFT] = WindowEvent.RELEASE_ARROW_LEFT
+release_dict[WindowEvent.PRESS_ARROW_RIGHT] = WindowEvent.RELEASE_ARROW_RIGHT
+release_dict[WindowEvent.PRESS_BUTTON_START] = WindowEvent.RELEASE_BUTTON_START
+release_dict[WindowEvent.PRESS_BUTTON_SELECT] = WindowEvent.RELEASE_BUTTON_SELECT
+release_dict[WindowEvent.PRESS_BUTTON_A] = WindowEvent.RELEASE_BUTTON_A
+release_dict[WindowEvent.PRESS_BUTTON_B] = WindowEvent.RELEASE_BUTTON_B
+
+
 load_dotenv()
 GAME_PATH = os.getenv('GAME_PATH')
 
@@ -57,6 +68,13 @@ with PyBoy(GAME_PATH) as pyboy:
         event = pitch_controller.get_control(curr[1])
         pyboy.send_input(event)
 
+        # go to next frame
+        frame_num += 1
+        pyboy.tick()
+
+        # release input
+        pyboy.send_input(release_dict[event])
+
         # get next input
         if len(framed_notes) == 0:
             pyboy.tick()
@@ -75,6 +93,13 @@ with PyBoy(GAME_PATH) as pyboy:
             # there is an event on this frame, execute it
             event = pitch_controller.get_control(curr[1])
             pyboy.send_input(event)
+
+            # go to next frame
+            frame_num += 1
+            pyboy.tick()
+
+            # release input
+            pyboy.send_input(release_dict[event])
 
             # get next input
             if len(framed_notes) == 0:
