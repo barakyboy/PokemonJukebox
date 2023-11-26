@@ -49,8 +49,23 @@ with PyBoy(GAME_PATH) as pyboy:
 
     frame_num = 0
     pitch_controller = PitchControl()
+
+    # deal with frame 0
+    if curr[0] == frame_num:
+        # there is an event on this frame, execute it
+        event = pitch_controller.get_control(curr[1])
+        pyboy.send_input(event)
+
+        # get next input
+        if len(framed_notes) == 0:
+            exit()  # end program
+
+        curr = framed_notes.pop(0)
+
+    frame_num += 1
+
     # game loop
-    while (not pyboy.tick()) and (curr is not None) and (len(framed_notes) != 0):
+    while not pyboy.tick():
 
         # check if there is an event on this frame
         if curr[0] == frame_num:
@@ -59,7 +74,9 @@ with PyBoy(GAME_PATH) as pyboy:
             event = pitch_controller.get_control(curr[1])
             pyboy.send_input(event)
 
-            # reset curr to None
+            # get next input
+            if len(framed_notes) == 0:
+                exit()  # end program
             curr = framed_notes.pop(0)
 
         # increment frame num
