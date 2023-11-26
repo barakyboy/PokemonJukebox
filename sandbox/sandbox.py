@@ -27,7 +27,7 @@ release_dict[WindowEvent.PRESS_BUTTON_B] = WindowEvent.RELEASE_BUTTON_B
 load_dotenv()
 GAME_PATH = os.getenv('GAME_PATH')
 
-yt = YouTube('https://www.youtube.com/watch?v=R4D_12tRenQ&ab_channel=NerosCinema2')
+yt = YouTube('https://www.youtube.com/watch?v=UdD4VTUvk8A')
 video = yt.streams.filter(only_audio=True).first()
 
 # set up path
