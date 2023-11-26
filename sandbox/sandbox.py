@@ -7,7 +7,7 @@ from basic_pitch.inference import predict
 from basic_pitch import ICASSP_2022_MODEL_PATH
 from src.utilities.NoteFilterStrategy import TopNVelocityStrategy
 from src.utilities.FrameConverter import FrameConverter
-from src.utilities.PitchControls import PitchControl
+from src.utilities.PitchControl import PitchControl
 
 
 load_dotenv()
@@ -56,7 +56,7 @@ with PyBoy(GAME_PATH) as pyboy:
         if curr[0] == frame_num:
 
             # there is an event on this frame, execute it
-            event = pitch_controller(curr[1])
+            event = pitch_controller.get_control(curr[1])
             pyboy.send_input(event)
 
             # reset curr to None

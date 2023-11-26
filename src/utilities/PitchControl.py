@@ -36,7 +36,7 @@ class PitchControl:
         """
 
         # check that input is valid
-        pcs = set(pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8, pc9, pc10, pc11, pc12)
+        pcs = {pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8, pc9, pc10, pc11, pc12}
         if len(pcs) != 12:
             raise ValueError("The pitch classes must be distinct and cover entire pitch class spectrum")
 
@@ -57,7 +57,8 @@ class PitchControl:
         """
         returns the control that the pitch class maps to
         :param pc: a Pitch object
-        :return: the WindowEvent control that the pitch class maps to in this object
+        :return: the WindowEvent control that the pitch class maps to in this object's control map
         """
+        return self.control_map[pc]
 
 

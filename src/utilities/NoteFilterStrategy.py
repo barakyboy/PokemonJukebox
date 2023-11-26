@@ -86,7 +86,7 @@ class TopNVelocityStrategy(NoteFilterStrategy):
 
             # get sublist within that second
             j = 0
-            while (len(notes_copy) != 0) and (floor(notes_copy[j].start) == i):
+            while ((len(notes_copy) - j) != 0) and (floor(notes_copy[j].start) == i):
                 j += 1
 
             sub_list = []
