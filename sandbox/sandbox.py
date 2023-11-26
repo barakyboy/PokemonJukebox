@@ -29,7 +29,8 @@ mp3_path = os.path.abspath(mp3_path)
 
 # analyse
 model_output, midi_data, note_events = predict(mp3_path)
-print(f' model_output: {model_output}')
+
+midi_data.instruments[0].notes
 
 
 # instantiate game

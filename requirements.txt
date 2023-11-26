@@ -3,3 +3,4 @@ pyboy==1.6.9
 python-dotenv==1.0.0
 pytube==15.0.0
 librosa==0.9.1
+pretty_midi==0.2.10
