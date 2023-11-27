@@ -35,7 +35,7 @@ release_dict[WindowEvent.PRESS_BUTTON_B] = WindowEvent.RELEASE_BUTTON_B
 
 # get video
 
-yt = YouTube('https://www.youtube.com/watch?v=iWMN91gMD_4&ab_channel=JamesAlbert')
+yt = YouTube('https://www.youtube.com/watch?v=c2et21ilxko&ab_channel=Hadorbanim-Topic')
 video = yt.streams.filter(only_audio=True).first()
 
 # set up path
