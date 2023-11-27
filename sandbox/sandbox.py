@@ -30,7 +30,7 @@ release_dict[WindowEvent.PRESS_BUTTON_B] = WindowEvent.RELEASE_BUTTON_B
 load_dotenv()
 GAME_PATH = os.getenv('GAME_PATH')
 
-yt = YouTube('https://www.youtube.com/watch?v=Ljqe4Nj7nBA&ab_channel=Halo2playa')
+yt = YouTube('https://www.youtube.com/watch?v=KF32DRg9opA&ab_channel=explod2A03')
 video = yt.streams.filter(only_audio=True).first()
 
 # set up path
