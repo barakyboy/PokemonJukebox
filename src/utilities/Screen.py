@@ -12,7 +12,6 @@ class Screen:
     def __init__(self):
         # Initialize Pygame
         pygame.init()
-        pygame.time.Clock().tick(FrameConverter.FPS)
 
         # initialise screen populator
         self.__screen_populator = ScreenPopulator()

@@ -16,15 +16,15 @@ class ScreenPopulator:
         self.__image_size = (self.get_gameboy_image().get_width(), self.get_gameboy_image().get_height())
 
         # create surface for creating semi-transparent objects
-        self.__surface = pygame.Surface(self.__image_size)
-        self.__surface.set_colorkey((0, 0, 0))
+        self.__surface = pygame.Surface(self.__image_size, pygame.SRCALPHA)
+        self.__surface.fill((0, 0, 0, 0))
         self.__surface.set_alpha(self.CIRCLE_ALPHA)
 
     def reset_surface(self):
         """
         Resets the surface of the ScreenPopulator, sl that there is nothing drawn on it
         """
-        self.__surface.fill((0, 0, 0))
+        self.__surface.fill((0, 0, 0, 0))
 
     def get_surface(self):
         return self.__surface
