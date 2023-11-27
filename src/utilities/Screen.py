@@ -20,7 +20,6 @@ class Screen:
         self.__image = self.__screen_populator.get_gameboy_image()
         self.__screen = pygame.display.set_mode((self.__image.get_width(), self.__image.get_height()))
         pygame.display.set_caption("GameBoy Visualiser")
-        self.__screen.blit(self.__image, (0, 0))
 
     def update(self, win_event=None):
         """

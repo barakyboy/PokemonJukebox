@@ -11,6 +11,7 @@ from src.utilities.PitchControl import PitchControl
 from pydub import AudioSegment
 from pydub.playback import play
 import threading
+from src.utilities.Screen import Screen
 
 # initialise controls dictionary
 release_dict = dict()
@@ -27,7 +28,7 @@ release_dict[WindowEvent.PRESS_BUTTON_B] = WindowEvent.RELEASE_BUTTON_B
 load_dotenv()
 GAME_PATH = os.getenv('GAME_PATH')
 
-yt = YouTube('https://www.youtube.com/watch?v=UdD4VTUvk8A')
+yt = YouTube('https://www.youtube.com/watch?v=Ljqe4Nj7nBA&ab_channel=Halo2playa')
 video = yt.streams.filter(only_audio=True).first()
 
 # set up path
@@ -61,6 +62,8 @@ curr = framed_notes.pop(0)
 sound = AudioSegment.from_file(mp3_path, format="mp4")
 t = threading.Thread(target=play, args=(sound,))
 
+# instantiate the gameboy screen visual
+screen = Screen()
 
 # instantiate game
 with PyBoy(GAME_PATH) as pyboy:
@@ -76,6 +79,9 @@ with PyBoy(GAME_PATH) as pyboy:
         event = pitch_controller.get_control(curr[1])
         pyboy.send_input(event)
 
+        # update visual
+        screen.update(event)
+
         # go to next frame
         frame_num += 1
         pyboy.tick()
@@ -83,12 +89,19 @@ with PyBoy(GAME_PATH) as pyboy:
         # release input
         pyboy.send_input(release_dict[event])
 
+        # hold visual of last input for another frame
+        screen.update(event)
+
         # get next input
         if len(framed_notes) == 0:
             pyboy.tick()
             exit()  # end program
 
         curr = framed_notes.pop(0)
+
+    else:
+        # update visual
+        screen.update()
 
     frame_num += 1
 
@@ -102,6 +115,9 @@ with PyBoy(GAME_PATH) as pyboy:
             event = pitch_controller.get_control(curr[1])
             pyboy.send_input(event)
 
+            # update visual
+            screen.update(event)
+
             # go to next frame
             frame_num += 1
             pyboy.tick()
@@ -109,12 +125,18 @@ with PyBoy(GAME_PATH) as pyboy:
             # release input
             pyboy.send_input(release_dict[event])
 
+            # hold visual of last input for another frame
+            screen.update(event)
+
             # get next input
             if len(framed_notes) == 0:
                 pyboy.tick()
                 exit()  # end program
 
             curr = framed_notes.pop(0)
+
+        else:
+            screen.update()
 
         # increment frame num
         frame_num += 1
