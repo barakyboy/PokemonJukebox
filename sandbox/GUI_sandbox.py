@@ -21,8 +21,13 @@ pygame.display.set_caption("Display Image")
 # Set up the initial position for the image
 image_pos = (0,0)
 screen.blit(image, image_pos)
-pygame.display.flip()
 pygame.time.Clock().tick(30)
+surface1 = pygame.Surface((image.get_width(),image.get_height()))
+surface1.set_colorkey((0,0,0))
+surface1.set_alpha(169)
+pygame.draw.circle(surface1, (241,8,60), (337,291), 18)
+screen.blit(surface1, (0,0))
+pygame.display.flip()
 
 
 while True:
