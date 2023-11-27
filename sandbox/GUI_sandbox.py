@@ -1,39 +1,31 @@
 import pygame
+from src.utilities.Screen import Screen
+from pyboy import WindowEvent
 from dotenv import load_dotenv
-import os
-import sys
 
 load_dotenv()
-IMAGE_PATH = os.getenv('GAMEBOY_IMAGE_PATH')
-
-
-# Initialize Pygame
-pygame.init()
-
-# Load an image
-image = pygame.image.load(IMAGE_PATH)
-
-screen = pygame.display.set_mode((image.get_width(), image.get_height()))
-pygame.display.set_caption("Display Image")
+screen = Screen()
 
 
 
-# Set up the initial position for the image
-image_pos = (0,0)
-screen.blit(image, image_pos)
-pygame.time.Clock().tick(30)
-surface1 = pygame.Surface((image.get_width(),image.get_height()))
-surface1.set_colorkey((0,0,0))
-surface1.set_alpha(169)
-pygame.draw.circle(surface1, (241,8,60), (337,291), 18)
-screen.blit(surface1, (0,0))
-pygame.display.flip()
 
 
-while True:
+
+
+
+event = WindowEvent.PRESS_ARROW_UP
+
+i = 0
+RUNNING = True
+while RUNNING:
+    i += 2
+    if (i % 60 == 0) and (event == WindowEvent.PRESS_ARROW_UP):
+        event = WindowEvent.PRESS_ARROW_DOWN
+    elif i % 60 == 0:
+        event = WindowEvent.PRESS_ARROW_LEFT
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+            RUNNING = False
 
+pygame.quit()
 
