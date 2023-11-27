@@ -29,7 +29,7 @@ class GameBoyImage:
         :param win_event: a pyboy window event
         :return: the coordinate of the control that the window event maps to.
         """
-        return self.EVENT_TO_CENTRE_MAP(win_event)
+        return self.EVENT_TO_CENTRE_MAP[win_event]
 
 
 

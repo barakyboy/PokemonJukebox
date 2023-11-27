@@ -24,9 +24,10 @@ class ScreenPopulator:
         """
         Resets the surface of the ScreenPopulator, sl that there is nothing drawn on it
         """
-        self.__surface = pygame.Surface(self.__image_size)
-        self.__surface.set_colorkey((0, 0, 0))
-        self.__surface.set_alpha(self.CIRCLE_ALPHA)
+        self.__surface.fill((0, 0, 0))
+
+    def get_surface(self):
+        return self.__surface
 
     def get_gameboy_image(self):
         """
@@ -41,7 +42,6 @@ class ScreenPopulator:
         If input is None, simply refreshes the surface (i.e removes all other input). If input is a
         window event that maps to something, refreshes surface and then renders on top of it
         :param win_event: a pyboy WindowEvent
-        :return: the surface to be rendered at
         """
         self.reset_surface()
         if win_event is not None:
@@ -49,5 +49,4 @@ class ScreenPopulator:
                                self.CIRCLE_RGB,
                                self.__gameboy_image.convert_win_event_to_coordinates(win_event),
                                self.CIRCLE_RADIUS)
-        return self.__surface
 

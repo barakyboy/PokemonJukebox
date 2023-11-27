@@ -22,6 +22,11 @@ class Screen:
         self.__screen = pygame.display.set_mode((image.get_width(), image.get_height()))
         pygame.display.set_caption("PlayBoy Visualiser")
         self.__screen.blit(image, (0, 0))
+
+        # set up surface for red circles
+        self.__screen.blit(self.__screen_populator.get_surface(), (0, 0))
+
+        # render
         pygame.display.flip()
 
     def update(self, win_event=None):
@@ -30,8 +35,14 @@ class Screen:
         If None, clears screen of red circles
         :param win_event: a pyboy Window Event
         """
-        surface = self.__screen_populator.update_screen(win_event)
-        self.__screen.blit(surface, (0, 0))
+
+        # update surface
+        self.__screen_populator.update_screen(win_event)
+
+        # add visual to screen
+        self.__screen.blit(self.__screen_populator.get_surface(), (0, 0))
+
+        # update display
         pygame.display.flip()
 
 
