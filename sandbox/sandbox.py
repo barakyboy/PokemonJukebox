@@ -2,6 +2,7 @@ from pyboy import PyBoy
 from pyboy import WindowEvent
 from dotenv import load_dotenv
 import os
+import time
 from pytube import YouTube
 from basic_pitch.inference import predict
 from basic_pitch import ICASSP_2022_MODEL_PATH
@@ -15,6 +16,12 @@ from src.utilities.Screen import Screen
 
 
 
+
+load_dotenv()
+GAME_PATH = os.getenv('GAME_PATH')
+
+VID_FILE_NAME = "my_vid.mp3"
+
 # initialise controls dictionary
 release_dict = dict()
 release_dict[WindowEvent.PRESS_ARROW_UP] = WindowEvent.RELEASE_ARROW_UP
@@ -26,11 +33,9 @@ release_dict[WindowEvent.PRESS_BUTTON_SELECT] = WindowEvent.RELEASE_BUTTON_SELEC
 release_dict[WindowEvent.PRESS_BUTTON_A] = WindowEvent.RELEASE_BUTTON_A
 release_dict[WindowEvent.PRESS_BUTTON_B] = WindowEvent.RELEASE_BUTTON_B
 
+# get video
 
-load_dotenv()
-GAME_PATH = os.getenv('GAME_PATH')
-
-yt = YouTube('https://www.youtube.com/watch?v=KF32DRg9opA&ab_channel=explod2A03')
+yt = YouTube('https://www.youtube.com/watch?v=iWMN91gMD_4&ab_channel=JamesAlbert')
 video = yt.streams.filter(only_audio=True).first()
 
 # set up path
@@ -43,7 +48,8 @@ music_path = os.path.join(current_directory, "..", "assets")
 out_file = video.download(output_path=music_path)
 
 # change format to mp3
-mp3_path = os.path.join(current_directory, "..", "assets", "my_vid.mp3")
+
+mp3_path = os.path.join(current_directory, "..", "assets", VID_FILE_NAME)
 os.rename(out_file, mp3_path)
 mp3_path = os.path.abspath(mp3_path)
 
@@ -69,6 +75,9 @@ screen = Screen()
 
 # instantiate game
 with PyBoy(GAME_PATH) as pyboy:
+
+    # initial wait for pyboy graphic to end
+    time.sleep(15)
 
     frame_num = 0
     pitch_controller = PitchControl()
