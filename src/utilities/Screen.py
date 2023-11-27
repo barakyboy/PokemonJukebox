@@ -17,16 +17,10 @@ class Screen:
         self.__screen_populator = ScreenPopulator()
 
         # set gameboy image
-        image = self.__screen_populator.get_gameboy_image()
-        self.__screen = pygame.display.set_mode((image.get_width(), image.get_height()))
-        pygame.display.set_caption("PlayBoy Visualiser")
-        self.__screen.blit(image, (0, 0))
-
-        # set up surface for red circles
-        self.__screen.blit(self.__screen_populator.get_surface(), (0, 0))
-
-        # render
-        pygame.display.flip()
+        self.__image = self.__screen_populator.get_gameboy_image()
+        self.__screen = pygame.display.set_mode((self.__image.get_width(), self.__image.get_height()))
+        pygame.display.set_caption("GameBoy Visualiser")
+        self.__screen.blit(self.__image, (0, 0))
 
     def update(self, win_event=None):
         """
@@ -35,8 +29,11 @@ class Screen:
         :param win_event: a pyboy Window Event
         """
 
+        # refresh gameboy image
+        self.__screen.blit(self.__image, (0, 0))
+
         # update surface
-        self.__screen_populator.update_screen(win_event)
+        self.__screen_populator.update_surface(win_event)
 
         # add visual to screen
         self.__screen.blit(self.__screen_populator.get_surface(), (0, 0))

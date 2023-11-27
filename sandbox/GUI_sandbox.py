@@ -23,7 +23,7 @@ i = 0
 with PyBoy(os.getenv('GAME_PATH')) as pyboy:
 
     while not pyboy.tick():
-        i += 2
+        i += 1
         if (i % 60 == 0) and (event == WindowEvent.PRESS_ARROW_UP):
             event = WindowEvent.PRESS_ARROW_DOWN
             screen.update(win_event=event)

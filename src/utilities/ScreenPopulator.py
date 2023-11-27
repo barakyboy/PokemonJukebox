@@ -18,7 +18,6 @@ class ScreenPopulator:
         # create surface for creating semi-transparent objects
         self.__surface = pygame.Surface(self.__image_size, pygame.SRCALPHA)
         self.__surface.fill((0, 0, 0, 0))
-        self.__surface.set_alpha(self.CIRCLE_ALPHA)
 
     def reset_surface(self):
         """
@@ -36,7 +35,7 @@ class ScreenPopulator:
         """
         return pygame.image.load(self.__gameboy_image.IMAGE_PATH)
 
-    def update_screen(self, win_event=None):
+    def update_surface(self, win_event=None):
         """
         Takes a pyboy window event as input and renders a semi-transparent red circle at that input.
         If input is None, simply refreshes the surface (i.e removes all other input). If input is a
@@ -46,7 +45,7 @@ class ScreenPopulator:
         self.reset_surface()
         if win_event is not None:
             pygame.draw.circle(self.__surface,
-                               self.CIRCLE_RGB,
+                               self.CIRCLE_RGB + (self.CIRCLE_ALPHA, ),
                                self.__gameboy_image.convert_win_event_to_coordinates(win_event),
                                self.CIRCLE_RADIUS)
 
