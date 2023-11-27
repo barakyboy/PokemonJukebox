@@ -13,6 +13,8 @@ from pydub.playback import play
 import threading
 from src.utilities.Screen import Screen
 
+
+
 # initialise controls dictionary
 release_dict = dict()
 release_dict[WindowEvent.PRESS_ARROW_UP] = WindowEvent.RELEASE_ARROW_UP
@@ -76,17 +78,19 @@ with PyBoy(GAME_PATH) as pyboy:
 
         # there is an event on this frame, execute it
         event = pitch_controller.get_control(curr[1])
-        pyboy.send_input(event)
-
-        # update visual
-        screen.update(event)
 
         # start music
         t.start()
 
-        # go to next frame
-        frame_num += 1
-        pyboy.tick()
+        for i in range(FrameConverter.HOLD_FRAMES):
+            # hold for required number of frames
+            pyboy.send_input(event)
+
+            # update visual
+            screen.update(event)
+            # go to next frame
+            frame_num += 1
+            pyboy.tick()
 
         # release input
         pyboy.send_input(release_dict[event])
@@ -118,14 +122,16 @@ with PyBoy(GAME_PATH) as pyboy:
 
             # there is an event on this frame, execute it
             event = pitch_controller.get_control(curr[1])
-            pyboy.send_input(event)
 
-            # update visual
-            screen.update(event)
+            for i in range(FrameConverter.HOLD_FRAMES):
+                # hold for required number of frames
+                pyboy.send_input(event)
 
-            # go to next frame
-            frame_num += 1
-            pyboy.tick()
+                # update visual
+                screen.update(event)
+                # go to next frame
+                frame_num += 1
+                pyboy.tick()
 
             # release input
             pyboy.send_input(release_dict[event])

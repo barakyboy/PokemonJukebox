@@ -11,6 +11,7 @@ class FrameConverter:
 
     FPS = 60
     NOTES_IN_OCTAVE = 12
+    HOLD_FRAMES = 5
 
     def convert_notes_to_frames(self, notes: list[Note]) -> list:
         """
@@ -24,7 +25,8 @@ class FrameConverter:
         of the note(i.e, of the form (frame, pitch)). Events will be at least two frames apart to allow for key release
         """
 
-        framed_list = [((floor(note.start * self.FPS/2) * 2), Pitch(note.pitch % self.NOTES_IN_OCTAVE))
+        framed_list = [((floor(note.start * self.FPS/(self.HOLD_FRAMES + 1)) * (self.HOLD_FRAMES + 1)),
+                        Pitch(note.pitch % self.NOTES_IN_OCTAVE))
                        for note in notes]
 
 

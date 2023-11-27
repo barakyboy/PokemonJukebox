@@ -48,7 +48,7 @@ class TopNVelocityStrategy(NoteFilterStrategy):
     A class that implements NoteFilterStrategy by choosing the top n notes for each second
     """
 
-    DEFAULT_TOP_N = 2  # default number of top velocities chosen by top n strategy
+    DEFAULT_TOP_N = 4  # default number of top velocities chosen by top n strategy
     MAX_TOP_NOTES = 15  # maximum number of top notes allowed
     MIN_TOP_NOTES = 1  # minimum number of top notes allowed
 
