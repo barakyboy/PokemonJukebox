@@ -67,7 +67,6 @@ screen = Screen()
 
 # instantiate game
 with PyBoy(GAME_PATH) as pyboy:
-    t.start()
 
     frame_num = 0
     pitch_controller = PitchControl()
@@ -81,6 +80,9 @@ with PyBoy(GAME_PATH) as pyboy:
 
         # update visual
         screen.update(event)
+
+        # start music
+        t.start()
 
         # go to next frame
         frame_num += 1
@@ -102,6 +104,9 @@ with PyBoy(GAME_PATH) as pyboy:
     else:
         # update visual
         screen.update()
+
+        # start music
+        t.start()
 
     frame_num += 1
 
