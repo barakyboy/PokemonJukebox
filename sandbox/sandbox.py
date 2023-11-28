@@ -3,7 +3,6 @@ from pyboy import WindowEvent
 from dotenv import load_dotenv
 import os
 import time
-import pygame
 from pytube import YouTube
 from basic_pitch.inference import predict
 from src.utilities.NoteFilterStrategy import TopNVelocityStrategy
@@ -31,7 +30,7 @@ release_dict[WindowEvent.PRESS_BUTTON_B] = WindowEvent.RELEASE_BUTTON_B
 
 # get video
 
-yt = YouTube('https://www.youtube.com/watch?v=c2et21ilxko&ab_channel=Hadorbanim-Topic')
+yt = YouTube('https://www.youtube.com/watch?v=tAaGKo4XVvM&ab_channel=Halo2playa')
 video = yt.streams.filter(only_audio=True).first()
 
 # set up path
@@ -63,17 +62,11 @@ if len(framed_notes) == 0:
 # get current note data
 curr = framed_notes.pop(0)
 
-
+# prepare video thread
+t = threading.Thread(target=os.startfile, args=("check.mp4",))
 
 # instantiate the gameboy screen visual
 screen = Screen()
-
-# prepare video thread
-tv = threading.Thread(target=os.startfile, args=("check.mp4",))
-
-# prepare music thread
-pygame.mixer.music.load("midi.mid")
-tm = threading.Thread(pygame.mixer.music.play())
 
 # instantiate game
 with PyBoy(GAME_PATH) as pyboy:
@@ -91,8 +84,7 @@ with PyBoy(GAME_PATH) as pyboy:
         event = pitch_controller.get_control(curr[1])
 
         # start music
-        tv.start()
-        tm.start()
+        t.start()
 
         for i in range(FrameConverter.HOLD_FRAMES):
             # hold for required number of frames
@@ -122,8 +114,7 @@ with PyBoy(GAME_PATH) as pyboy:
         screen.update()
 
         # start music
-        tv.start()
-        tm.start()
+        t.start()
 
     frame_num += 1
 
