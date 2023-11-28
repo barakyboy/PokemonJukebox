@@ -6,8 +6,11 @@ import time
 from src.utilities.PitchControl import PitchControl
 import threading
 from src.utilities.Screen import Screen
+from src.utilities.FrameConverter import FrameConverter
 from queue import Queue
 from src.pipelines.add_song_to_queue import add_song_to_queue
+from pydub import AudioSegment
+from pydub.playback import play
 
 
 load_dotenv()
@@ -36,8 +39,9 @@ framed_notes = queue.get()
 # get current note data
 curr = framed_notes.pop(0)
 
-# prepare video thread
-t = threading.Thread(target=os.startfile, args=("check.mp4",))
+# prepare music thread
+audio = AudioSegment.from_file("C:\\Users\\uriba\\Desktop\\musicmon\\assets\\MUS\\mus1.mp3", format="mp4")
+t = threading.Thread(target=play, args=(audio,))
 
 # instantiate the gameboy screen visual
 screen = Screen()

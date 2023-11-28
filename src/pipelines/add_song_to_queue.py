@@ -7,11 +7,11 @@ from src.utilities.FrameConverter import FrameConverter
 from queue import Queue
 
 
-def add_song_to_queue(queue: Queue, link: str):
+def add_song_to_queue(q: Queue, link: str):
     """
     Takes a queue and a youtube link as input and adds a list of framed notes corresponding to the processed link
     to the queue
-    :param queue: a queue of lists of framed notes
+    :param q: a queue of lists of framed notes
     :param link: a youtube link
     """
 
@@ -38,4 +38,4 @@ def add_song_to_queue(queue: Queue, link: str):
     framed_notes = FrameConverter().convert_notes_to_frames(filtered_notes)
 
     # add to queue
-    queue.queue(framed_notes)
+    q.put(framed_notes)
