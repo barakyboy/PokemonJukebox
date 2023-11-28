@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import os
 from pytube import YouTube
-
+from src.utilities.exceptions import TooManyFilesError
 
 load_dotenv()
 
@@ -56,10 +56,7 @@ class MusicDownloader:
                 return abs_path
 
 
-class TooManyFilesError(RuntimeError):
-    """
-    an exception that is raised when there are too many files in a directory
-    """
+
 
 
 

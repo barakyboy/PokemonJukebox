@@ -10,12 +10,11 @@ from src.utilities.FrameConverter import FrameConverter
 from src.utilities.PitchControl import PitchControl
 import threading
 from src.utilities.Screen import Screen
+from src.utilities.MusicDownloader import MusicDownloader
 
 
 load_dotenv()
 GAME_PATH = os.getenv('GAME_PATH')
-
-VID_FILE_NAME = "my_vid.mp3"
 
 # initialise controls dictionary
 release_dict = dict()
@@ -28,25 +27,11 @@ release_dict[WindowEvent.PRESS_BUTTON_SELECT] = WindowEvent.RELEASE_BUTTON_SELEC
 release_dict[WindowEvent.PRESS_BUTTON_A] = WindowEvent.RELEASE_BUTTON_A
 release_dict[WindowEvent.PRESS_BUTTON_B] = WindowEvent.RELEASE_BUTTON_B
 
-# get video
 
-yt = YouTube('https://www.youtube.com/watch?v=tAaGKo4XVvM&ab_channel=Halo2playa')
-video = yt.streams.filter(only_audio=True).first()
+# download music file
+downloader = MusicDownloader()
+mp3_path = downloader.download_youtube_link('https://www.youtube.com/watch?v=tAaGKo4XVvM&ab_channel=Halo2playa')
 
-# set up path
-current_directory = os.getcwd()
-
-# Construct the path one level up and then into the "assets" folder
-music_path = os.path.join(current_directory, "..", "assets")
-
-
-out_file = video.download(output_path=music_path)
-
-# change format to mp3
-
-mp3_path = os.path.join(current_directory, "..", "assets", VID_FILE_NAME)
-os.rename(out_file, mp3_path)
-mp3_path = os.path.abspath(mp3_path)
 
 # analyse
 model_output, midi_data, note_events = predict(mp3_path)
