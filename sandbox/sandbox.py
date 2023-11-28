@@ -5,12 +5,9 @@ import os
 import time
 from pytube import YouTube
 from basic_pitch.inference import predict
-from basic_pitch import ICASSP_2022_MODEL_PATH
 from src.utilities.NoteFilterStrategy import TopNVelocityStrategy
 from src.utilities.FrameConverter import FrameConverter
 from src.utilities.PitchControl import PitchControl
-from pydub import AudioSegment
-from pydub.playback import play
 import threading
 from src.utilities.Screen import Screen
 
@@ -67,8 +64,8 @@ if len(framed_notes) == 0:
 # get current note data
 curr = framed_notes.pop(0)
 
-sound = AudioSegment.from_file(mp3_path, format="mp4")
-t = threading.Thread(target=play, args=(sound,))
+# prepare video thread
+t = threading.Thread(target=os.startfile, args=("check.mp4",))
 
 # instantiate the gameboy screen visual
 screen = Screen()

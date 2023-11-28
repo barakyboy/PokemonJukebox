@@ -1,39 +1,20 @@
-import os
+# Import the library after you have installed it
+import piano_visualizer
 
-import pygame
-from src.utilities.Screen import Screen
-from pyboy import WindowEvent
-from dotenv import load_dotenv
-from pyboy import PyBoy
+# Create a piano with a midi file(s)
+piano = piano_visualizer.Piano(["midi.mid"])
 
-load_dotenv()
-screen = Screen()
+# Create a video with resolution/fps
+video = piano_visualizer.Video((1920, 1080), 60)
 
+# Add piano to video
+video.add_piano(piano)
 
+# Export video on multiple cores (1 for single)
+video.export("check.mp4", num_cores=1, music=True)
 
+# You can add music too! (although it is sometimes offset from video)
+# video.export("your/export/path.mp4", num_cores=6, music=True)
 
-
-
-
-
-event = WindowEvent.PRESS_ARROW_UP
-
-i = 0
-
-with PyBoy(os.getenv('GAME_PATH')) as pyboy:
-
-    while not pyboy.tick():
-        i += 1
-        if (i % 60 == 0) and (event == WindowEvent.PRESS_ARROW_UP):
-            event = WindowEvent.PRESS_ARROW_DOWN
-            screen.update(win_event=event)
-
-        elif i % 60 == 0:
-            event = WindowEvent.PRESS_ARROW_UP
-            screen.update(win_event=event)
-        else:
-            screen.update()
-
-
-
-
+# Progress bars should show up
+# Once your video is exported it will be at the path you specified!
