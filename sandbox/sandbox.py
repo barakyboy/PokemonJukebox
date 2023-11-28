@@ -3,14 +3,11 @@ from pyboy import WindowEvent
 from dotenv import load_dotenv
 import os
 import time
-from pytube import YouTube
-from basic_pitch.inference import predict
-from src.utilities.NoteFilterStrategy import TopNVelocityStrategy
-from src.utilities.FrameConverter import FrameConverter
 from src.utilities.PitchControl import PitchControl
 import threading
 from src.utilities.Screen import Screen
-from src.utilities.MusicDownloader import MusicDownloader
+from queue import Queue
+from src.pipelines.add_song_to_queue import add_song_to_queue
 
 
 load_dotenv()
@@ -27,22 +24,14 @@ release_dict[WindowEvent.PRESS_BUTTON_SELECT] = WindowEvent.RELEASE_BUTTON_SELEC
 release_dict[WindowEvent.PRESS_BUTTON_A] = WindowEvent.RELEASE_BUTTON_A
 release_dict[WindowEvent.PRESS_BUTTON_B] = WindowEvent.RELEASE_BUTTON_B
 
+# song queue
+queue = Queue()
+LINK = 'https://www.youtube.com/watch?v=Xqf8jID9TsE&ab_channel=TerraBlue'
 
-# download music file
-downloader = MusicDownloader()
-mp3_path = downloader.download_youtube_link('https://www.youtube.com/watch?v=tAaGKo4XVvM&ab_channel=Halo2playa')
+# add initial song to queue
+add_song_to_queue(queue, link=LINK)
 
-
-# analyse
-model_output, midi_data, note_events = predict(mp3_path)
-
-# process notes
-notes = midi_data.instruments[0].notes
-filtered_notes = TopNVelocityStrategy().filter_notes(notes)
-framed_notes = FrameConverter().convert_notes_to_frames(filtered_notes)
-
-if len(framed_notes) == 0:
-    raise ValueError("No notes registered by AI")
+framed_notes = queue.get()
 
 # get current note data
 curr = framed_notes.pop(0)
