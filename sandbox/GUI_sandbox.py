@@ -11,7 +11,7 @@ video = piano_visualizer.Video((1920, 1080), 60)
 video.add_piano(piano)
 
 # Export video on multiple cores (1 for single)
-video.export("check.mp4", num_cores=1, music=True)
+video.export("check.mp4", num_cores=1)
 
 # You can add music too! (although it is sometimes offset from video)
 # video.export("your/export/path.mp4", num_cores=6, music=True)

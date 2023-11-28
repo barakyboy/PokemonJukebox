@@ -3,6 +3,7 @@ from pyboy import WindowEvent
 from dotenv import load_dotenv
 import os
 import time
+import pygame
 from pytube import YouTube
 from basic_pitch.inference import predict
 from src.utilities.NoteFilterStrategy import TopNVelocityStrategy
@@ -10,8 +11,6 @@ from src.utilities.FrameConverter import FrameConverter
 from src.utilities.PitchControl import PitchControl
 import threading
 from src.utilities.Screen import Screen
-
-
 
 
 load_dotenv()
@@ -64,11 +63,17 @@ if len(framed_notes) == 0:
 # get current note data
 curr = framed_notes.pop(0)
 
-# prepare video thread
-t = threading.Thread(target=os.startfile, args=("check.mp4",))
+
 
 # instantiate the gameboy screen visual
 screen = Screen()
+
+# prepare video thread
+tv = threading.Thread(target=os.startfile, args=("check.mp4",))
+
+# prepare music thread
+pygame.mixer.music.load("midi.mid")
+tm = threading.Thread(pygame.mixer.music.play())
 
 # instantiate game
 with PyBoy(GAME_PATH) as pyboy:
@@ -86,7 +91,8 @@ with PyBoy(GAME_PATH) as pyboy:
         event = pitch_controller.get_control(curr[1])
 
         # start music
-        t.start()
+        tv.start()
+        tm.start()
 
         for i in range(FrameConverter.HOLD_FRAMES):
             # hold for required number of frames
@@ -116,7 +122,8 @@ with PyBoy(GAME_PATH) as pyboy:
         screen.update()
 
         # start music
-        t.start()
+        tv.start()
+        tm.start()
 
     frame_num += 1
 

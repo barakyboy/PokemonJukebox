@@ -161,7 +161,3 @@ cython_debug/
 
 # ignore all assets
 assets/
-
-# ignore all midi files
-*.mid
-
