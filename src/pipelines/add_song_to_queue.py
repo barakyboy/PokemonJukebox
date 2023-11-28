@@ -29,11 +29,13 @@ def add_song_to_queue(q: Queue, link: str):
 
     # process notes
     if len(midi_data.instruments) == 0:
+        os.remove(mp3_abs_path)
         raise NoInstrumentsFoundError("Error: no instruments were analysed by the AI")
 
     notes = midi_data.instruments[0].notes
 
     if len(notes) == 0:
+        os.remove(mp3_abs_path)
         raise NoNotesFoundError("Error: no notes were analysed by the AI")
 
     # filter notes according to strategy
