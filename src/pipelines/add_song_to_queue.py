@@ -64,8 +64,8 @@ def add_song_to_queue(q: Queue, link: str):
             midi_data.write(midi_abs_path)
 
         # create thread that plays MIDI
-        mp = MusicPlayer()
-        t = threading.Thread(target=mp.play_midi_and_delete, args=(midi_abs_path, SOUNDFONT_PATH))
+        mp = MusicPlayer(SOUNDFONT_PATH)
+        t = threading.Thread(target=mp.play_midi_and_delete, args=(midi_abs_path,))
 
         # add to queue
         q.put((framed_notes, t))
