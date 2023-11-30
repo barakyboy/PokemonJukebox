@@ -5,10 +5,16 @@ from src.utilities.exceptions import NoInstrumentsFoundError, NoNotesFoundError
 from src.utilities.NoteFilterStrategy import TopNVelocityStrategy
 from src.utilities.FrameConverter import FrameConverter
 from queue import Queue
+from src.utilities.MusicDownloader import MusicDownloader
 import threading
-from pydub import AudioSegment
-from pydub.playback import play
 import os
+from dotenv import load_dotenv
+from src.utilities.MusicPlayer import MusicPlayer
+
+
+load_dotenv()
+MIDI_DIR = os.getenv('MIDI_DIR')
+SOUNDFONT_PATH = os.getenv('SOUNDFONT_PATH')
 
 
 def add_song_to_queue(q: Queue, link: str):
@@ -44,9 +50,16 @@ def add_song_to_queue(q: Queue, link: str):
     # convert filtered notes to frames and pitch classes
     framed_notes = FrameConverter().convert_notes_to_frames(filtered_notes)
 
-    # create the thread object containing the song for playing
-    audio = AudioSegment.from_file(mp3_abs_path, format="mp4")
-    t = threading.Thread(target=play, args=(audio,))
+    # save midi file temporarily
+    midi_abs_path = MIDI_DIR + mp3_abs_path.split(".")[0] + ".mid"
+    midi_data.write(midi_abs_path)
+
+    # create thread that plays MIDI
+    mp = MusicPlayer()
+    t = threading.Thread(target=mp.play_midi, args=(midi_abs_path, SOUNDFONT_PATH))
+
+    # delete the midi file
+    os.remove(midi_abs_path)
 
     # delete audio file
     os.remove(mp3_abs_path)
