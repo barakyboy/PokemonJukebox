@@ -9,13 +9,17 @@ from src.utilities.MusicDownloader import MusicDownloader
 import threading
 import os
 from dotenv import load_dotenv
-from src.utilities.MusicPlayer import MusicPlayer
-
-
+from pydub import AudioSegment
+from pydub.playback import play
+from midi2audio import FluidSynth
 
 load_dotenv()
 MIDI_DIR = os.getenv('MIDI_DIR')
 SOUNDFONT_PATH = os.getenv('SOUNDFONT_PATH')
+PLAYABLE_DIR = os.getenv('PLAYABLE_DIR')
+
+
+
 
 
 def add_song_to_queue(q: Queue, link: str):
@@ -26,6 +30,11 @@ def add_song_to_queue(q: Queue, link: str):
     :param q: a queue of lists of framed notes
     :param link: a youtube link
     """
+
+    # assignment for cleanup
+    audio_abs_path = None
+    mp3_abs_path = None
+    midi_abs_path = None
 
     # download video
     downloader = MusicDownloader()
@@ -63,9 +72,14 @@ def add_song_to_queue(q: Queue, link: str):
             midi_abs_path = candidate_path
             midi_data.write(midi_abs_path)
 
-        # create thread that plays MIDI
-        mp = MusicPlayer(SOUNDFONT_PATH)
-        t = threading.Thread(target=mp.play_midi_and_delete, args=(midi_abs_path,))
+        # convert midi to mp3
+        audio_abs_path = os.path.join(PLAYABLE_DIR, str(i)) + ".mp3"
+        fs = FluidSynth(SOUNDFONT_PATH)
+        fs.midi_to_audio(midi_abs_path, audio_abs_path)
+
+        # import mp3 audio
+        audio = AudioSegment.from_file(audio_abs_path, format="mp4")
+        t = threading.Thread(target=play, args=(audio,))
 
         # add to queue
         q.put((framed_notes, t))
@@ -74,6 +88,17 @@ def add_song_to_queue(q: Queue, link: str):
         raise
 
     finally:
+
         # delete audio file
-        os.remove(mp3_abs_path)
+        mutex = threading.Lock()
+        with mutex:
+            if os.path.isfile(mp3_abs_path):
+                os.remove(mp3_abs_path)
+
+            if os.path.isfile(audio_abs_path):
+                os.remove(audio_abs_path)
+
+            if os.path.isfile(midi_abs_path):
+                os.remove(midi_abs_path)
+
 
