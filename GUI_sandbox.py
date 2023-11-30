@@ -1,8 +1,20 @@
+# add pythonpath to searchpath. Should be path to root of project
+from dotenv import load_dotenv
+import os
+import sys
+load_dotenv()
+sys.path.append(os.getenv('PYTHONPATH'))
+
+
+
+
+
 import tkinter as tk
 from sandbox import main
 from threading import Thread
 from src.pipelines.add_song_to_queue import add_song_to_queue
 from queue import Queue
+
 
 
 # function for starting game
