@@ -28,7 +28,7 @@ class PitchControl:
         :param pc4: Pitch class that maps to PRESS_ARROW_LEFT
         :param pc5: Pitch class that maps to PRESS_BUTTON_A
         :param pc6: Pitch class that maps to PRESS_BUTTON_B
-        :param pc7: Pitch class that maps to PRESS_BUTTON_SELECT
+        :param pc7: Pitch class that maps to PRESS_BUTTON_A
         :param pc8: Pitch class that maps to PRESS_BUTTON_START
         :param pc9: Pitch class that maps to PRESS_ARROW_UP
         :param pc10: Pitch class that maps to PRESS_ARROW_DOWN
@@ -47,7 +47,7 @@ class PitchControl:
         self.control_map[pc4] = WindowEvent.PRESS_ARROW_LEFT
         self.control_map[pc5] = WindowEvent.PRESS_BUTTON_A
         self.control_map[pc6] = WindowEvent.PRESS_BUTTON_B
-        self.control_map[pc7] = WindowEvent.PRESS_BUTTON_SELECT
+        self.control_map[pc7] = WindowEvent.PRESS_BUTTON_A
         self.control_map[pc8] = WindowEvent.PRESS_BUTTON_START
         self.control_map[pc9] = WindowEvent.PRESS_ARROW_UP
         self.control_map[pc10] = WindowEvent.PRESS_ARROW_DOWN
