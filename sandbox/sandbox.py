@@ -9,10 +9,12 @@ from src.utilities.FrameConverter import FrameConverter
 from queue import Queue
 
 
+load_dotenv()
+GAME_PATH = os.getenv('GAME_PATH')
+
 def main(q: Queue):
 
-    load_dotenv()
-    GAME_PATH = os.getenv('GAME_PATH')
+
 
     # initialise controls dictionary
     release_dict = dict()
