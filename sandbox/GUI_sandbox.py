@@ -43,6 +43,5 @@ button = tk.Button(root, text="Get Text", command=get_text)
 button.pack(pady=10)
 
 
-
 # Start the Tkinter event loop
 root.mainloop()
