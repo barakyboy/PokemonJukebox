@@ -72,13 +72,13 @@ def add_song_to_queue(q: Queue, link: str):
             midi_abs_path = candidate_path
             midi_data.write(midi_abs_path)
 
-        # convert midi to mp3
-        audio_abs_path = os.path.join(PLAYABLE_DIR, str(i)) + ".mp3"
+        # convert midi to wav
+        audio_abs_path = os.path.join(PLAYABLE_DIR, str(i)) + ".wav"
         fs = FluidSynth(SOUNDFONT_PATH)
         fs.midi_to_audio(midi_abs_path, audio_abs_path)
 
-        # import mp3 audio
-        audio = AudioSegment.from_file(audio_abs_path, format="mp4")
+        # import wav audio
+        audio = AudioSegment.from_file(audio_abs_path, format="wav")
         t = threading.Thread(target=play, args=(audio,))
 
         # add to queue
