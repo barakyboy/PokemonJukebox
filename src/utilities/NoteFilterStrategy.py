@@ -107,6 +107,34 @@ class TopNVelocityStrategy(NoteFilterStrategy):
 
 
 
+class LowerFrequencyThresholdStrategy(NoteFilterStrategy):
+    """
+    A class that implements NoteFilterStrategy by removing all notes below a base frequency,
+    specified by its midi note number
+    """
+
+    DEFAULT_THRESHOLD = 57  # default threshold, A3
+
+    def __init__(self, threshold: int = DEFAULT_THRESHOLD):
+
+        """
+        initialises the object with some midi note number threshold, representing pitch. All notes below it are removed.
+        :param threshold: a midi_note_number threshold associated with the object, that determines the threshold
+        note must exceed (or equaled to ) to be included
+        """
+
+        if (threshold < 0) or (threshold > 127):
+            raise ValueError("Invalid velocity value: values must be between 0 and 127, inclusive")
+
+        self.__threshold = threshold
+
+    def filter_notes(self, notes: list[Note]) -> list[Note]:
+        """
+        filters a list of Notes based on some midi note number threshold, representing pitch
+        :param notes: A list of prettymidi notes
+        :return: The input list, containing only notes with pitch exceeding or equal to the threshold of the object
+        """
+        return [note for note in notes if note.pitch >= self.__threshold]
 
 
 
