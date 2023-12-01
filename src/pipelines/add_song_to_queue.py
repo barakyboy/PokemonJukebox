@@ -2,7 +2,8 @@
 from src.utilities.MusicDownloader import MusicDownloader
 from basic_pitch.inference import predict
 from src.utilities.exceptions import NoInstrumentsFoundError, NoNotesFoundError
-from src.utilities.NoteFilterStrategy import TopNVelocityStrategy
+from src.utilities.NoteFilterStrategy import TopNVelocityStrategy,\
+                        CompositeNoteFilterStrategyApplyAll, LowerFrequencyThresholdStrategy
 from src.utilities.FrameConverter import FrameConverter
 from queue import Queue
 from src.utilities.MusicDownloader import MusicDownloader
@@ -53,8 +54,13 @@ def add_song_to_queue(q: Queue, link: str):
         if len(notes) == 0:
             raise NoNotesFoundError("Error: no notes were analysed by the AI")
 
+        # determine filtering strategy
+        filter_strategy = CompositeNoteFilterStrategyApplyAll()
+        filter_strategy.add_child(LowerFrequencyThresholdStrategy())
+        filter_strategy.add_child(TopNVelocityStrategy())
+
         # filter notes according to strategy
-        filtered_notes = TopNVelocityStrategy().filter_notes(notes)
+        filtered_notes = filter_strategy.filter_notes(notes)
 
         # convert filtered notes to frames and pitch classes
         framed_notes = FrameConverter().convert_notes_to_frames(filtered_notes)

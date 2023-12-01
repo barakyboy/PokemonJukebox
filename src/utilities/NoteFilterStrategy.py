@@ -106,7 +106,6 @@ class TopNVelocityStrategy(NoteFilterStrategy):
         return filtered_list
 
 
-
 class LowerFrequencyThresholdStrategy(NoteFilterStrategy):
     """
     A class that implements NoteFilterStrategy by removing all notes below a base frequency,
@@ -135,6 +134,37 @@ class LowerFrequencyThresholdStrategy(NoteFilterStrategy):
         :return: The input list, containing only notes with pitch exceeding or equal to the threshold of the object
         """
         return [note for note in notes if note.pitch >= self.__threshold]
+
+
+class CompositeNoteFilterStrategyApplyAll(NoteFilterStrategy):
+    """
+    The composite of the NoteFilterStrategy. Its filtering function applies all strategies.
+    """
+
+    def __init__(self):
+        self.children = []
+
+    def add_child(self, child: NoteFilterStrategy):
+        """
+        Adds a NoteFilterStrategy to list of note filter strategy children
+        :param child: a NoteFilterStrategy
+        """
+
+        self.children.append(child)
+
+    def filter_notes(self, notes: list[Note]) -> list[Note]:
+        """
+        Filters a list of pretty midi notes by applying all child strategies. They are applied in the order
+        they are added.
+        :param notes: a list of pretty midi notes
+        :return: the list of pretty midi notes after having every strategy applied
+        """
+        for strategy in self.children:
+            notes = strategy.filter_notes(notes)
+
+        return notes
+
+
 
 
 
