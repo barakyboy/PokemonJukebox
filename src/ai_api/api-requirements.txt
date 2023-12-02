@@ -4,4 +4,4 @@ pytube==15.0.0
 librosa==0.9.1
 pretty_midi==0.2.10
 Flask==3.0.0
-gunicorn==19.7.1
+gunicorn==21.2.0

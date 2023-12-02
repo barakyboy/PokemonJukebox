@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from pretty_midi.pretty_midi import Note
 from math import ceil, floor
 
