@@ -20,9 +20,6 @@ SOUNDFONT_PATH = os.getenv('SOUNDFONT_PATH')
 PLAYABLE_DIR = os.getenv('PLAYABLE_DIR')
 
 
-
-
-
 def add_song_to_queue(q: Queue, link: str):
     """
     Takes a queue and a youtube link as input and adds a list of framed notes corresponding to the processed link
@@ -37,11 +34,11 @@ def add_song_to_queue(q: Queue, link: str):
     mp3_abs_path = None
     midi_abs_path = None
 
-    # download video
-    downloader = MusicDownloader()
-    mp3_abs_path = downloader.download_youtube_link(link)
-
     try:
+        # download video
+        downloader = MusicDownloader()
+        mp3_abs_path = downloader.download_youtube_link(link)
+
         # run AI over video
         midi_data = predict(mp3_abs_path)[1]
 
