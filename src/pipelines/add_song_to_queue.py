@@ -29,9 +29,9 @@ def add_song_to_queue(q: Queue, link: str):
     """
 
     # assignment for cleanup
-    audio_abs_path = None
-    mp3_abs_path = None
-    midi_abs_path = None
+    audio_abs_path = ''
+    mp3_abs_path = ''
+    midi_abs_path = ''
 
     try:
         # download video

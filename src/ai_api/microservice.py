@@ -20,7 +20,7 @@ def process_link():
     link = data.get('link')
 
     # initialise mp3 abs path
-    mp3_abs_path = None
+    mp3_abs_path = ''
 
     try:
         downloader = MusicDownloader()
