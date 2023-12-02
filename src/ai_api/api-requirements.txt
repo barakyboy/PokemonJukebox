@@ -5,3 +5,4 @@ librosa==0.9.1
 pretty_midi==0.2.10
 Flask==3.0.0
 gunicorn==21.2.0
+requests==2.31.0
