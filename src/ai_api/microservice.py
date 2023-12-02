@@ -1,13 +1,15 @@
 # a flask microservice used to run basic-pitch AI over an mp3 file
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
+import os
 from src.utilities.MusicDownloader import MusicDownloader
 from basic_pitch.inference import predict
-import os
-import json
 
 load_dotenv()
 PORT = os.getenv('PORT')
+
+
+
 
 app = Flask(__name__)
 
@@ -33,9 +35,6 @@ def process_link():
     finally:
         if os.path.isfile(mp3_abs_path):
             os.remove(mp3_abs_path)
-
-
-
 
 
 if __name__ == '__main__':
