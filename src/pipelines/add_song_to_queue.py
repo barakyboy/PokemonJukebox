@@ -1,6 +1,6 @@
 # a pipeline to add a song to queue
 from basic_pitch.inference import predict
-from src.utilities.exceptions import NoInstrumentsFoundError, NoNotesFoundError
+from src.utilities.Exceptions import NoInstrumentsFoundError, NoNotesFoundError
 from src.utilities.NoteFilterStrategy import TopNVelocityStrategy,\
                         CompositeNoteFilterStrategyApplyAll, LowerFrequencyThresholdStrategy
 from src.utilities.FrameConverter import FrameConverter
@@ -49,6 +49,9 @@ def add_song_to_queue(q: Queue, link: str):
 
         if len(notes) == 0:
             raise NoNotesFoundError("Error: no notes were analysed by the AI")
+
+        # remove pitch bends
+        midi_data.instruments[0].pitch_bends = []
 
         # determine filtering strategy
         filter_strategy = CompositeNoteFilterStrategyApplyAll()

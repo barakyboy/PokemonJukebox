@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import os
 from pytube import YouTube
-from src.utilities.exceptions import TooManyFilesError
+from src.utilities.Exceptions import TooManyFilesError
 
 load_dotenv()
 
