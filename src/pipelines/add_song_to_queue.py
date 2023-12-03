@@ -54,6 +54,9 @@ def add_song_to_queue(q: Queue, link: str):
         if len(notes) == 0:
             raise NoNotesFoundError("Error: no notes were analysed by the AI")
 
+        # remove pitch bends
+        midi_data.instruments[0].pitch_bends = []
+
         # determine filtering strategy
         filter_strategy = CompositeNoteFilterStrategyApplyAll()
         filter_strategy.add_child(LowerFrequencyThresholdStrategy())
