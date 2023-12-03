@@ -7,10 +7,14 @@ from src.utilities.PitchControl import PitchControl
 from src.utilities.Screen import Screen
 from src.utilities.FrameConverter import FrameConverter
 from queue import Queue
+from src.utilities.Signal import Signal
 
 
-
-def main(q: Queue):
+def main(q: Queue, sig_q: Queue):
+    """
+    :param q: a queue for managing the songs that are queued
+    :param sig_q: a queue containing signals for inter thread communication
+    """
 
     load_dotenv()
     GAME_PATH = os.getenv('GAME_PATH')
@@ -25,8 +29,6 @@ def main(q: Queue):
     release_dict[WindowEvent.PRESS_BUTTON_SELECT] = WindowEvent.RELEASE_BUTTON_SELECT
     release_dict[WindowEvent.PRESS_BUTTON_A] = WindowEvent.RELEASE_BUTTON_A
     release_dict[WindowEvent.PRESS_BUTTON_B] = WindowEvent.RELEASE_BUTTON_B
-
-
 
     # initial framed notes and curr states
     framed_notes = []
@@ -46,12 +48,30 @@ def main(q: Queue):
 
         # game loop
         while not pyboy.tick():
+
+            # process any signals that have arrived
+            while not sig_q.empty():
+                signal = sig_q.get()
+                if signal == Signal.QUIT:
+                    return
+
             # check if no more instructions
             if curr is None:
+
                 # get more instructions
                 while q.empty():
-                    # yield
-                    time.sleep(0)
+
+                    # update visual
+                    screen.update()
+
+                    # give control back to player (for loading game, etc)
+                    pyboy.tick()
+
+                    # process any signals that have arrived
+                    while not sig_q.empty():
+                        signal = sig_q.get()
+                        if signal == Signal.QUIT:
+                            pyboy.stop(save=False)
 
                 # queue is no longer empty, extract next song
                 framed_notes, t = q.get()
@@ -64,7 +84,6 @@ def main(q: Queue):
 
                 # start song
                 t.start()
-
 
             # check if there is an event on this frame
             if curr[0] == frame_num:
