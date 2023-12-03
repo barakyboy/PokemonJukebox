@@ -70,6 +70,7 @@ def process_mp3():
 
         # run AI over video
         midi_data = predict(mp3_abs_path)[1]
+        print('finished analysing midi data')
         return jsonify(midi_data), 200
 
     except Exception as e:
