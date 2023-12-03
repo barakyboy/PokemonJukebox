@@ -71,7 +71,7 @@ def main(q: Queue, sig_q: Queue):
                     while not sig_q.empty():
                         signal = sig_q.get()
                         if signal == Signal.QUIT:
-                            pyboy.stop(save=False)
+                            return
 
                 # queue is no longer empty, extract next song
                 framed_notes, t = q.get()
