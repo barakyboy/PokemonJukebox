@@ -69,7 +69,7 @@ def process_mp3():
     try:
 
         # run AI over video
-        midi_data = predict(mp3_abs_path)[1]
+        midi_data = predict(audio_path=mp3_abs_path, model_or_model_path=basic_pitch_model)[1]
         print('finished analysing midi data')
         return jsonify(midi_data), 200
 
