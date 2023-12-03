@@ -1,5 +1,6 @@
 # a flask microservice used to run basic-pitch AI over an mp3 file
 from flask import Flask, request, jsonify
+from functools import wraps
 from dotenv import load_dotenv
 import os
 from src.utilities.MusicDownloader import MusicDownloader
@@ -13,10 +14,34 @@ basic_pitch_model = tf.saved_model.load(str(ICASSP_2022_MODEL_PATH))
 PORT = os.getenv('PORT')
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.getenv('PYTHONANYWHERE_API_TOKEN')
 
 
+def key_required(f):
+    """
+    Authorization decorator
+    :param f: function to be decorated
+    """
+    @wraps(f)
+    def decorator(*args, **kwargs):
+
+        if 'Authorization' in request.headers:
+            key = request.headers['Authorization']
+        else:
+            return jsonify({"message": "Invalid header; please include a key mapped to by 'Authorization'"}, 401)
+
+        if key == app.config['SECRET_KEY']:
+            return f(*args, **kwargs)
+        else:
+            return jsonify({"message": "Invalid key; you are not authorised to use this service"}, 401)
+
+    return decorator
+
+
+@key_required
 @app.route("/process_mp3", methods=['POST'])
 def process_link():
+    return jsonify({'message': 'successfully authorized!'})
     data = request.get_json()
     link = data.get('link')
 
