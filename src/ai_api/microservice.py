@@ -4,17 +4,18 @@ from dotenv import load_dotenv
 import os
 from src.utilities.MusicDownloader import MusicDownloader
 from basic_pitch.inference import predict
+from basic_pitch import ICASSP_2022_MODEL_PATH
+import tensorflow as tf
 
 load_dotenv()
+
+basic_pitch_model = tf.saved_model.load(str(ICASSP_2022_MODEL_PATH))
 PORT = os.getenv('PORT')
-
-
-
 
 app = Flask(__name__)
 
 
-@app.route("/process_link", methods=['POST'])
+@app.route("/process_mp3", methods=['POST'])
 def process_link():
     data = request.get_json()
     link = data.get('link')
