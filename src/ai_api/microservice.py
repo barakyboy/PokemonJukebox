@@ -38,7 +38,6 @@ def key_required(f):
     return decorator
 
 
-
 @app.route("/process_mp3", methods=['POST'])
 @key_required
 def process_link():
