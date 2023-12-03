@@ -15,17 +15,17 @@ from midi2audio import FluidSynth
 
 load_dotenv()
 MIDI_DIR = os.getenv('MIDI_DIR')
-SOUNDFONT_PATH = os.getenv('SOUNDFONT_PATH')
 PLAYABLE_DIR = os.getenv('PLAYABLE_DIR')
 
 
-def add_song_to_queue(q: Queue, link: str):
+def add_song_to_queue(q: Queue, link: str, fs: FluidSynth):
     """
     Takes a queue and a youtube link as input and adds a list of framed notes corresponding to the processed link
     to the queue, along with a thread object for playing the song. So adds a tuple to the queue of the form:
     (list of framed notes, tuple for playing song)
     :param q: a queue of lists of framed notes
     :param link: a youtube link
+    :param fs: a FluidSynth instance
     """
 
     # assignment for cleanup
@@ -79,7 +79,6 @@ def add_song_to_queue(q: Queue, link: str):
 
         # convert midi to wav
         audio_abs_path = os.path.join(PLAYABLE_DIR, str(i)) + ".wav"
-        fs = FluidSynth(SOUNDFONT_PATH)
         fs.midi_to_audio(midi_abs_path, audio_abs_path)
 
         # import wav audio
