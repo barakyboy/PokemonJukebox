@@ -1,7 +1,7 @@
 # a pipeline to add a song to queue
 from src.utilities.MusicDownloader import MusicDownloader
 from basic_pitch.inference import predict
-from src.utilities.exceptions import NoInstrumentsFoundError, NoNotesFoundError
+from src.utilities.Exceptions import NoInstrumentsFoundError, NoNotesFoundError
 from src.utilities.NoteFilterStrategy import TopNVelocityStrategy,\
                         CompositeNoteFilterStrategyApplyAll, LowerFrequencyThresholdStrategy
 from src.utilities.FrameConverter import FrameConverter
