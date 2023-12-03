@@ -28,18 +28,19 @@ def key_required(f):
         if 'Authorization' in request.headers:
             key = request.headers['Authorization']
         else:
-            return jsonify({"message": "Invalid header; please include a key mapped to by 'Authorization'"}, 401)
+            return jsonify({"message": "Invalid header; please include a key mapped to by 'Authorization'"}, status=401)
 
         if key == app.config['SECRET_KEY']:
             return f(*args, **kwargs)
         else:
-            return jsonify({"message": "Invalid key; you are not authorised to use this service"}, 401)
+            return jsonify({"message": "Invalid key; you are not authorised to use this service"}, status=401)
 
     return decorator
 
 
-@key_required
+
 @app.route("/process_mp3", methods=['POST'])
+@key_required
 def process_link():
     return jsonify({'message': 'successfully authorized!'})
     data = request.get_json()
