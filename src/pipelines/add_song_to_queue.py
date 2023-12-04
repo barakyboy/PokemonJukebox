@@ -30,16 +30,16 @@ def add_song_to_queue(q: Queue, link: str, fs: FluidSynth):
 
     # assignment for cleanup
     audio_abs_path = ''
-    mp3_abs_path = ''
+    ogg_abs_path = ''
     midi_abs_path = ''
 
     try:
         # download video
         downloader = MusicDownloader()
-        mp3_abs_path = downloader.download_youtube_link(link)
+        ogg_abs_path = downloader.download_youtube_link(link)
 
         # run AI over video
-        midi_data = predict(mp3_abs_path)[1]
+        midi_data = predict(ogg_abs_path)[1]
 
         # process notes
         if len(midi_data.instruments) == 0:
@@ -96,8 +96,8 @@ def add_song_to_queue(q: Queue, link: str, fs: FluidSynth):
         # delete audio file
         mutex = threading.Lock()
         with mutex:
-            if os.path.isfile(mp3_abs_path):
-                os.remove(mp3_abs_path)
+            if os.path.isfile(ogg_abs_path):
+                os.remove(ogg_abs_path)
 
             if os.path.isfile(audio_abs_path):
                 os.remove(audio_abs_path)
