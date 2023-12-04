@@ -92,9 +92,24 @@ def queue():
 
     # run ai over song
     threading.Thread(target=run_ai, args=(ogg_abs_path,)).start()
-    return jsonify({'message': 'successfully uploaded file, running AI over music...'}), 201
+    return jsonify({'message': 'successfully uploaded file, running AI over music...'}), 202
 
 
+
+@app.route("/dequeue", methods=['GET'])
+@key_required
+def dequeue():
+    if not q.empty():
+        head = q.get()
+        if issubclass(head, Exception):
+
+            # exception occurred
+            return jsonify({'message': 'error: an error has occurred while running AI over the data: ' + str(head)}),\
+                   500
+        else:
+            return jsonify(head), 200
+    else:
+        return jsonify({'message': 'the queue is empty!'}), 204
 
 
 if __name__ == '__main__':
