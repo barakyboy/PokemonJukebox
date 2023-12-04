@@ -9,7 +9,7 @@ load_dotenv()
 POST_URL = f"https://{os.getenv('PYTHONANYWHERE_POST_URL')}"
 GET_URL = f"https://{os.getenv('PYTHONANYWHERE_GET_URL')}"
 TOKEN = os.getenv('PYTHONANYWHERE_API_TOKEN')
-MUS_PATH = os.path.join(os.getenv('MP3_DIR'), 'mus0.mp3')
+MUS_PATH = os.path.join(os.getenv('OGG_DIR'), 'mus0.ogg')
 
 d = MusicDownloader()
 d.download_youtube_link('https://www.youtube.com/watch?v=NTa6Xbzfq1U&ab_channel=ultragamemusic')
@@ -30,6 +30,8 @@ while status_code != 200:
     with requests.get(GET_URL, headers={'Authorization': '{key}'.format(key=TOKEN)}) as response:
         print(response.text)
         status_code = response.status_code
+        time.sleep(30)
+
 
 # End the timer
 end_time = time.perf_counter()
