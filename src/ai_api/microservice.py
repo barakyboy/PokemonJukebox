@@ -18,10 +18,7 @@ app.config['OGG_DIR'] = os.getenv('OGG_DIR')
 app.config['SECRET_KEY'] = os.getenv('PYTHONANYWHERE_API_TOKEN')
 app.config['PORT'] = os.getenv('PORT')
 app.config['MODEL'] = tf.saved_model.load(str(ICASSP_2022_MODEL_PATH))
-
-# song queue
-q = queue.Queue()
-
+app.config['QUEUE'] = queue.Queue()
 
 def key_required(f):
     """
@@ -59,10 +56,10 @@ def queue():
             # run AI over video
             midi_data = predict(audio_path=song_abs_path, model_or_model_path=app.config['MODEL'])[1]
             print('finished analysing midi data')
-            q.put(midi_data)
+            app.config['QUEUE'].put(midi_data)
 
         except Exception as e:
-            q.put(e)
+            app.config['QUEUE'].put(e)
 
         finally:
             if os.path.isfile(song_abs_path):
@@ -95,12 +92,11 @@ def queue():
     return jsonify({'message': 'successfully uploaded file, running AI over music...'}), 202
 
 
-
 @app.route("/dequeue", methods=['GET'])
 @key_required
 def dequeue():
-    if not q.empty():
-        head = q.get()
+    if not app.config['QUEUE'].empty():
+        head = app.config['QUEUE'].get()
         if issubclass(head, Exception):
 
             # exception occurred
