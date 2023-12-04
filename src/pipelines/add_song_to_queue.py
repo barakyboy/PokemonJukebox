@@ -1,5 +1,4 @@
 # a pipeline to add a song to queue
-from src.utilities.MusicDownloader import MusicDownloader
 from basic_pitch.inference import predict
 from src.utilities.Exceptions import NoInstrumentsFoundError, NoNotesFoundError
 from src.utilities.NoteFilterStrategy import TopNVelocityStrategy,\
@@ -16,34 +15,31 @@ from midi2audio import FluidSynth
 
 load_dotenv()
 MIDI_DIR = os.getenv('MIDI_DIR')
-SOUNDFONT_PATH = os.getenv('SOUNDFONT_PATH')
 PLAYABLE_DIR = os.getenv('PLAYABLE_DIR')
 
 
-
-
-
-def add_song_to_queue(q: Queue, link: str):
+def add_song_to_queue(q: Queue, link: str, fs: FluidSynth):
     """
     Takes a queue and a youtube link as input and adds a list of framed notes corresponding to the processed link
     to the queue, along with a thread object for playing the song. So adds a tuple to the queue of the form:
     (list of framed notes, tuple for playing song)
     :param q: a queue of lists of framed notes
     :param link: a youtube link
+    :param fs: a FluidSynth instance
     """
 
     # assignment for cleanup
-    audio_abs_path = None
-    mp3_abs_path = None
-    midi_abs_path = None
-
-    # download video
-    downloader = MusicDownloader()
-    mp3_abs_path = downloader.download_youtube_link(link)
+    audio_abs_path = ''
+    ogg_abs_path = ''
+    midi_abs_path = ''
 
     try:
+        # download video
+        downloader = MusicDownloader()
+        ogg_abs_path = downloader.download_youtube_link(link)
+
         # run AI over video
-        midi_data = predict(mp3_abs_path)[1]
+        midi_data = predict(ogg_abs_path)[1]
 
         # process notes
         if len(midi_data.instruments) == 0:
@@ -83,7 +79,6 @@ def add_song_to_queue(q: Queue, link: str):
 
         # convert midi to wav
         audio_abs_path = os.path.join(PLAYABLE_DIR, str(i)) + ".wav"
-        fs = FluidSynth(SOUNDFONT_PATH)
         fs.midi_to_audio(midi_abs_path, audio_abs_path)
 
         # import wav audio
@@ -101,8 +96,8 @@ def add_song_to_queue(q: Queue, link: str):
         # delete audio file
         mutex = threading.Lock()
         with mutex:
-            if os.path.isfile(mp3_abs_path):
-                os.remove(mp3_abs_path)
+            if os.path.isfile(ogg_abs_path):
+                os.remove(ogg_abs_path)
 
             if os.path.isfile(audio_abs_path):
                 os.remove(audio_abs_path)
