@@ -108,5 +108,5 @@ def dequeue():
         return jsonify({'message': 'the queue is empty!'}), 204
 
 
-if __name__ == '__main__':
-    app.run(port=app.config['PORT'])
+# if __name__ == '__main__':
+#     app.run(port=app.config['PORT'])
