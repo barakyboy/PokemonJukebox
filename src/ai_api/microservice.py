@@ -3,7 +3,6 @@ from flask import Flask, request, jsonify
 from functools import wraps
 from dotenv import load_dotenv
 import os
-from src.utilities.MusicDownloader import MusicDownloader
 from basic_pitch.inference import predict
 from basic_pitch import ICASSP_2022_MODEL_PATH
 import tensorflow as tf
