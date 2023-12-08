@@ -1,24 +1,29 @@
 # syntax=docker/dockerfile:1
-FROM python:3.9-slim-bookworm
+FROM python:3.10-bookworm
 
-COPY api-requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
-
-COPY . /app
-
+# create working directory
 WORKDIR /app
 
+# create virtual environment and set it and activate it
+ENV VIRTUAL_ENV=/app/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# upgrade pip and install requirements
+RUN pip install --upgrade pip
+COPY api-requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+
+
+# prepare working directory
+COPY . /app
 RUN mkdir /app/MUS
 
 
+# expose port
 EXPOSE 8080
 
-ENV PYTHONANYWHERE_API_TOKEN=21d547e7a616af943d0547f9593c967b972cb400
-ENV PORT=8080
-ENV OGG_DIR=/app/MUS
-
-
-
+# run command
 CMD ["gunicorn","--config", "gunicorn_config.py", "microservice:app"]
 
 
