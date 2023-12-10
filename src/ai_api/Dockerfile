@@ -20,13 +20,17 @@ RUN useradd -ms /bin/bash admin
 
 # prepare working directory
 COPY . /app
-RUN mkdir /app/MUS
+COPY ../utlity /app/utility
+COPY ../../../assets /app/assets
 
 
 # grant admin user permissions
 RUN chown -R admin:admin /app
 RUN chmod -R 777 /app
 USER admin
+
+# install necessary libraries
+RUN sudo apt-get install fluidsynth
 
 
 # expose port

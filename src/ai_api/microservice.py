@@ -13,7 +13,6 @@ load_dotenv()
 
 app = Flask(__name__)
 
-app.config['OGG_DIR'] = os.getenv('OGG_DIR')
 app.config['SECRET_KEY'] = os.getenv('PYTHONANYWHERE_API_TOKEN')
 app.config['PORT'] = os.getenv('PORT')
 app.config['MODEL'] = tf.saved_model.load(str(ICASSP_2022_MODEL_PATH))
@@ -96,7 +95,7 @@ def queue():
 def dequeue():
     if not app.config['QUEUE'].empty():
         head = app.config['QUEUE'].get()
-        if issubclass(head, Exception):
+        if isinstance(head, Exception):
 
             # exception occurred
             return jsonify({'message': 'error: an error has occurred while running AI over the data: ' + str(head)}),\
@@ -104,8 +103,7 @@ def dequeue():
         else:
             return jsonify(head), 200
     else:
-        return jsonify({'message': 'the queue is empty!'}), 204
+        return jsonify({'message': 'the queue is empty!'}), 202
 
 
-# if __name__ == '__main__':
-#     app.run(port=app.config['PORT'])
+
