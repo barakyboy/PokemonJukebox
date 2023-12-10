@@ -14,10 +14,19 @@ RUN pip install --upgrade pip
 COPY api-requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
+# add admin user
+RUN useradd -ms /bin/bash admin
+
 
 # prepare working directory
 COPY . /app
 RUN mkdir /app/MUS
+
+
+# grant admin user permissions
+RUN chown -R admin:admin /app
+RUN chmod -R 777 /app
+USER admin
 
 
 # expose port
