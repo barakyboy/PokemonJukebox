@@ -1,18 +1,15 @@
 import requests
 from dotenv import load_dotenv
 import os
-from utilities.MusicDownloader import MusicDownloader
 import time
 
 load_dotenv()
 
-POST_URL = f"https://{os.getenv('PYTHONANYWHERE_POST_URL')}"
-GET_URL = f"https://{os.getenv('PYTHONANYWHERE_GET_URL')}"
+POST_URL = os.getenv('PYTHONANYWHERE_POST_URL')
+GET_URL = os.getenv('PYTHONANYWHERE_GET_URL')
 TOKEN = os.getenv('PYTHONANYWHERE_API_TOKEN')
 MUS_PATH = os.path.join(os.getenv('OGG_DIR'), 'mus0.ogg')
 
-d = MusicDownloader()
-d.download_youtube_link('https://www.youtube.com/watch?v=NTa6Xbzfq1U&ab_channel=ultragamemusic')
 
 with open(MUS_PATH, 'rb') as file:
 
@@ -28,7 +25,9 @@ status_code = 0
 while status_code != 200:
     # send get request
     with requests.get(GET_URL, headers={'Authorization': '{key}'.format(key=TOKEN)}) as response:
+        print('hello1')
         print(response.text)
+        print('hello2')
         status_code = response.status_code
         time.sleep(30)
 

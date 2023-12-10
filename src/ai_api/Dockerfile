@@ -1,8 +1,14 @@
 # syntax=docker/dockerfile:1
+
+# a dockerfile for ai_api, build from directory above in order to have access to utilities
 FROM python:3.10-bookworm
 
 # create working directory
 WORKDIR /app
+
+# copy items into working dir
+COPY ai_api/* /app
+COPY utilities /app
 
 # install necessary libraries
 RUN sudo apt-get install fluidsynth
@@ -14,14 +20,8 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # upgrade pip and install requirements
 RUN pip install --upgrade pip
-COPY api-requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip install -r api-requirements.txt
 
-
-# prepare working directory
-COPY . /app
-COPY ../utlity /app/utility
-COPY ../../../assets /app/assets
 
 # add admin user
 RUN useradd -ms /bin/bash admin

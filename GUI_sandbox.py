@@ -51,9 +51,6 @@ sig_q = Queue()
 # create game thread
 game = Thread(target=main, args=(q, sig_q))
 
-# create FluidSynth instance
-fs = FluidSynth(SOUNDFONT_PATH)
-
 # Create a button to trigger game
 start_game_button = tk.Button(root, text="Start Game", command=start_game)
 start_game_button.pack()

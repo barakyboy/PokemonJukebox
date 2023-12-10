@@ -49,4 +49,20 @@ class FrameConverter:
 
         return de_dupled_list
 
+    def frame_to_dic(self, framed_list):
+        """
+        Takes a framed list and converts it to a dictionary representation
+        :param framed_list: a list of (frame, Pitch)
+        :return: its dictionary representation
+        """
+        return {(x[0], x[1].value) for x in framed_list}
+
+    def dict_to_frame(self, dic_framed_list):
+        """
+        Reverses frame_to_dict; converts a dictionary representation of a framed list to a framed list
+        :param dic_framed_list: dict representation of a framed list
+        :return: a framed list
+        """
+        return [(key, Pitch(val)) for key, val in dic_framed_list.items()]
+
 
