@@ -87,7 +87,7 @@ def download_process_upload(link: str):
             # save framed notes
             json_abs_path = os.path.join(PROCESSED_DIR, str(i)) + ".json"
             with open(json_abs_path, 'w') as json_file:
-                json_file.write(json.dumps(framed_notes))
+                json_file.write(json.dumps(FrameConverter().frame_to_dic(framed_notes)))
 
     except Exception as e:
         # delete audio file
