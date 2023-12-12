@@ -2,11 +2,11 @@
 # saving the outcome along with a wav file associated with it
 import json
 from basic_pitch.inference import predict
-from utilities.Exceptions import NoInstrumentsFoundError, NoNotesFoundError
-from utilities.NoteFilterStrategy import TopNVelocityStrategy,\
+from src.utilities.Exceptions import NoInstrumentsFoundError, NoNotesFoundError
+from src.utilities.NoteFilterStrategy import TopNVelocityStrategy,\
                         CompositeNoteFilterStrategyApplyAll, LowerFrequencyThresholdStrategy
-from utilities.FrameConverter import FrameConverter
-from utilities.MusicDownloader import MusicDownloader
+from src.utilities.FrameConverter import FrameConverter
+from src.utilities.MusicDownloader import MusicDownloader
 import multiprocessing
 import os
 from dotenv import load_dotenv

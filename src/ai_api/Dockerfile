@@ -7,31 +7,25 @@ FROM python:3.10-bookworm
 WORKDIR /app
 
 # copy items into working dir
-COPY ai_api/* /app
-COPY utilities /app
+COPY ai_api /app
 
-# install necessary libraries
-RUN sudo apt-get install fluidsynth
-
-# create virtual environment and set it and activate it
+# Set env variables for virtual environment
 ENV VIRTUAL_ENV=/app/venv
-RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# upgrade pip and install requirements
-RUN pip install --upgrade pip
-RUN pip install -r api-requirements.txt
+# create utilities dir and move things into it, initialise src as module, install fluidsynth
+# upgrade pip and install requirements after activating virtual environment.
+# add admin user, grant admin
 
+RUN mkdir /app/src && mkdir /app/src/utilities && touch /app/src/__init__.py && apt-get update && \
+     apt-get install -y fluidsynth && python3 -m venv $VIRTUAL_ENV && pip install --upgrade pip && \
+    pip install -r api-requirements.txt && useradd -ms /bin/bash admin && chown -R admin:admin /app && chmod -R 777 /app
 
-# add admin user
-RUN useradd -ms /bin/bash admin
+# move utilitie over
+COPY utilities /app/src/utilities
 
-
-# grant admin user permissions
-RUN chown -R admin:admin /app
-RUN chmod -R 777 /app
+# change to admin user
 USER admin
-
 
 # expose port
 EXPOSE 8080

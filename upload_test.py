@@ -5,19 +5,14 @@ import time
 
 load_dotenv()
 
-POST_URL = os.getenv('PYTHONANYWHERE_POST_URL')
-GET_URL = os.getenv('PYTHONANYWHERE_GET_URL')
+POST_URL = 'https://pokemon-new-uribarakproject-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com/queue'
+GET_URL = 'https://pokemon-new-uribarakproject-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com/dequeue'
 TOKEN = os.getenv('PYTHONANYWHERE_API_TOKEN')
-MUS_PATH = os.path.join(os.getenv('OGG_DIR'), 'mus0.ogg')
+message = {'link': 'https://www.youtube.com/watch?v=NTa6Xbzfq1U&ab_channel=ultragamemusic'}
 
+with requests.post(POST_URL, headers={'Authorization': '{key}'.format(key=TOKEN)}, json=message) as response:
+    print (response.text)
 
-with open(MUS_PATH, 'rb') as file:
-
-    files = {'file': file}
-
-    with requests.post(POST_URL, headers={'Authorization': '{key}'.format(key=TOKEN)}, files=files) as response:
-
-        print(response.text)
 
 # check every 30 seconds if completed
 start_time = time.perf_counter()

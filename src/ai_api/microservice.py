@@ -3,7 +3,6 @@ from flask import Flask, request, jsonify, send_from_directory
 from functools import wraps
 from dotenv import load_dotenv
 import os
-from basic_pitch.inference import predict
 import multiprocessing
 from pipelines.download_process_upload import download_process_upload
 import json
@@ -57,7 +56,7 @@ def queue():
         link = data['link']
 
         # run ai over song
-        multiprocessing.Process(target=download_process_upload(), args=(link,)).start()
+        multiprocessing.Process(target=download_process_upload, args=(link,)).start()
         return jsonify({'message': 'successfully uploaded file, running AI over music...'}), 202
 
     except Exception as e:
