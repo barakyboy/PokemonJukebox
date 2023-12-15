@@ -18,7 +18,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # add admin user, grant admin
 
 RUN mkdir /app/src && mkdir /app/src/utilities && touch /app/src/__init__.py && apt-get update && \
-     apt-get install -y fluidsynth && python3 -m venv $VIRTUAL_ENV && pip install --upgrade pip && \
+     apt-get install -y fluidsynth && apt-get install -y ffmpeg && python3 -m venv $VIRTUAL_ENV && pip install --upgrade pip && \
     pip install -r api-requirements.txt && useradd -ms /bin/bash admin && chown -R admin:admin /app && chmod -R 777 /app
 
 # move utilitie over

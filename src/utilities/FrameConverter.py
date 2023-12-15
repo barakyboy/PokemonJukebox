@@ -55,7 +55,7 @@ class FrameConverter:
         :param framed_list: a list of (frame, Pitch)
         :return: its dictionary representation
         """
-        return {(x[0], x[1].value) for x in framed_list}
+        return {x[0]: x[1].value for x in framed_list}
 
     def dict_to_frame(self, dic_framed_list):
         """
