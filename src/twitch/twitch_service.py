@@ -1,3 +1,5 @@
+# service that monitors twitch and accepts requests for youtube links and sends them to AI_API
+
 import socket
 import dotenv
 import os
@@ -38,8 +40,6 @@ sock.send(f"PASS {TWITCH_OAUTH_TOKEN}\n".encode('utf-8'))
 sock.send(f"NICK {TWITCH_NICKNAME}\n".encode('utf-8'))
 sock.send(f"JOIN {TWITCH_CHANNEL}\n".encode('utf-8'))
 sock.send("CAP REQ :twitch.tv/tags\n".encode('utf-8'))
-
-
 
 try:
     while True:
