@@ -25,6 +25,7 @@ def check_save_queue(q: Queue):
 
     # initialise
     audio_abs_path = ''
+    message = ''
     try:
 
         # check if there is a song ready
