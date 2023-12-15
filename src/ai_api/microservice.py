@@ -6,7 +6,8 @@ import os
 import multiprocessing
 from pipelines.download_process_upload import download_process_upload
 import json
-
+import uuid
+import time
 
 
 load_dotenv()
@@ -44,9 +45,20 @@ def key_required(f):
     return decorator
 
 
+def generate_unique_key():
+    """
+    Generates a unique string key
+    :return: a unique string key
+    """
+    timestamp = str(int(time.time() * 1000))
+    unique_id = str(uuid.uuid4().hex)
+    key = timestamp + unique_id
+    return key
+
 @app.route("/queue", methods=['POST'])
 @key_required
 def queue():
+
     try:
         data = request.get_json()
 
@@ -58,7 +70,8 @@ def queue():
 
         # run ai over song
         multiprocessing.Process(target=download_process_upload, args=(link,)).start()
-        return jsonify({'message': 'successfully uploaded file, running AI over music...'}), 202
+        return jsonify({'message': 'successfully uploaded file, running AI over music...',
+                        'id' : generate_unique_key()}), 202
 
     except Exception as e:
         # exception occurred
