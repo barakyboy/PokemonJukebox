@@ -129,7 +129,7 @@ def clean():
 
         file_id = data['file_id']
         audio_abs_path = os.path.join(PLAYABLE_DIR, file_id) + ".wav"
-        midi_abs_path = os.path.join(PLAYABLE_DIR, file_id) + ".mid"
+        midi_abs_path = os.path.join(MIDI_DIR, file_id) + ".mid"
 
         # delete files
         os.remove(audio_abs_path)
