@@ -13,7 +13,7 @@ import requests
 
 load_dotenv()
 PLAYABLE_DIR = os.getenv('PLAYABLE_DIR')
-API_KEY = os.getenv('PYTHONANYWHERE_API_TOKEN')
+API_KEY = os.getenv('API_TOKEN')
 API_ENDPOINT = os.getenv('API_ENDPOINT')
 
 

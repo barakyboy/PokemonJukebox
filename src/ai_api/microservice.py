@@ -12,7 +12,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = os.getenv('PYTHONANYWHERE_API_TOKEN')
+app.config['SECRET_KEY'] = os.getenv('API_TOKEN')
 app.config['PORT'] = os.getenv('PORT')
 
 
