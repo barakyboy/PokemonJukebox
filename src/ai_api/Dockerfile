@@ -16,6 +16,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # create utilities dir and move things into it, initialise src as module, install fluidsynth
 # upgrade pip and install requirements after activating virtual environment.
 # add admin user, grant admin
+# (run together to reduce image size)
 
 RUN mkdir /app/src && mkdir /app/src/utilities && touch /app/src/__init__.py && apt-get update && \
      apt-get install -y fluidsynth && apt-get install -y ffmpeg && python3 -m venv $VIRTUAL_ENV && pip install --upgrade pip && \
