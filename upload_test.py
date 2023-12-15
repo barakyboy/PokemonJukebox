@@ -5,21 +5,22 @@ import time
 
 load_dotenv()
 
-POST_URL = 'https://pokemon-new-uribarakproject-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com/queue'
-GET_URL = 'https://pokemon-new-uribarakproject-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com/dequeue'
-TOKEN = os.getenv('PYTHONANYWHERE_API_TOKEN')
+
+POST_URL = f'{os.getenv("MICROSERVICE_PATH")}/queue'
+GET_URL = f'{os.getenv("MICROSERVICE_PATH")}/dequeue'
+TOKEN = os.getenv('API_TOKEN')
 message = {'link': 'https://www.youtube.com/watch?v=NTa6Xbzfq1U&ab_channel=ultragamemusic'}
 
-with requests.post(POST_URL, headers={'Authorization': '{key}'.format(key=TOKEN)}, json=message) as response:
-    print (response.text)
-
+# with requests.post(POST_URL, headers={'Authorization': '{key}'.format(key=TOKEN)}, json=message) as response:
+#     print (response.text)# with requests.post(POST_URL, headers={'Authorization': '{key}'.format(key=TOKEN)}, json=message) as response:
+#     print (response.text)
 
 # check every 30 seconds if completed
 start_time = time.perf_counter()
 status_code = 0
 while status_code != 200:
     # send get request
-    with requests.get(GET_URL, headers={'Authorization': '{key}'.format(key=TOKEN)}) as response:
+    with requests.get(GET_URL, headers={'Authorization': f'{TOKEN}'}) as response:
         print('hello1')
         print(response.text)
         print('hello2')
