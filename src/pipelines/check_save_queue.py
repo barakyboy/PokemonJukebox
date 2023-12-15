@@ -17,7 +17,7 @@ API_KEY = os.getenv('PYTHONANYWHERE_API_TOKEN')
 API_ENDPOINT = os.getenv('API_ENDPOINT')
 
 
-def check_save_upload(q: Queue):
+def check_save_queue(q: Queue):
     """
     adds a song to queue if one exists
     :param q: a queue of lists of framed notes and threads
