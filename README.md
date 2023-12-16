@@ -1,4 +1,5 @@
 # Pokémon Jukebox  
+
 ###Welcome
 Welcome to Pokémon Jukebox!  
 This project is an experiment to see if pokemon can be beaten using the power of music!
@@ -6,6 +7,7 @@ This project is an experiment to see if pokemon can be beaten using the power of
 #### NOTE
 This project is is currently a work-in-progress. The front-end repo
 will be linked here when it goes into production.  
+
 ###How does it work?
 Essentially, the idea is to converts audio signals into 
 gameboy input, and see if a Pokémon game can be beaten
@@ -14,6 +16,7 @@ For an enjoyable experience, this was implemented via Twitch.
 Twitch moderators for the channel of choice submit youtube links in chat which
 are then processed by a pipeline that returns a processed
 audio representation of the music  
+
 #### How is the audio processed?
 The audio is converted to midi via Spotify's open source basic-pitch
 AI. From that point on certain pitches map to certain inputs.
