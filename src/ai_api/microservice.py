@@ -181,16 +181,59 @@ def clean():
         # exception occurred
         return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
 
+
 @app.route("/status", methods=['POST'])
 @key_required
 def check_status():
-    """
+    f"""
     Checks the status of pipelines with ids requested in JSON. If a pipeline has failed status, delete that pipeline
     id record. If
-    :return:
+    :return: a JSON representing the status of each pipeline_uuid. Each pipeline_uuid is returned as a key.
+    the values have the following meaning:
+    {PipelineStatus.RUNNING.value} : running
+    {PipelineStatus.FAILED.value} : failed
+    {PipelineStatus.COMPLETE.value} : complete
+    {PipelineStatus.QUEUED.value} : queued (this meaning is perserved only if you know that the pipeline uuid represents
+    a pipeline which has previously been running)
     """
+    try:
+        # extract list of ids
+        data = request.get_json()
 
-    # extract list of ids
+        # check that data is properly formatted
+        if 'pipeline_uuids' not in data:
+            return jsonify({'message': 'error: please provide a list under key pipeline_uuids'}), 400
+
+        pipeline_uuids = data['pipeline_uuids']
+
+        # check on status of each pipeline_uuid
+        response = {}
+        for pipeline_uuid in pipeline_uuids:
+            pipeline_uuid_path = os.path.join(ID_DIR, pipeline_uuid)
+            if os.path.isfile(pipeline_uuid_path):
+                # still exists, open file
+                with open(pipeline_uuid_path, 'r') as fp:
+
+                    # add status of uuid to response
+                    status = int(fp.read())
+
+                response[pipeline_uuid] = status
+
+                # delete if failed
+                if status == PipelineStatus.FAILED.value:
+                    os.remove(pipeline_uuid_path)
+            else:
+
+                # file no longer exists indicating queued
+                response[pipeline_uuid] = PipelineStatus.QUEUED.value
+
+        return jsonify(response), 200
+
+    except Exception as e:
+        # exception occurred
+        return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
+
+
 
 
 
