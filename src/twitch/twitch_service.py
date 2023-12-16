@@ -4,7 +4,7 @@ import socket
 import dotenv
 import os
 import requests
-
+import threading
 
 dotenv.load_dotenv()
 TWITCH_SERVER = os.getenv('TWITCH_SERVER')
@@ -33,40 +33,52 @@ def isMod(badge: str):
 
 
 
-# create and connect socket
-sock = socket.socket()
-sock.connect((TWITCH_SERVER, int(TWITCH_PORT)))
-sock.send(f"PASS {TWITCH_OAUTH_TOKEN}\n".encode('utf-8'))
-sock.send(f"NICK {TWITCH_NICKNAME}\n".encode('utf-8'))
-sock.send(f"JOIN {TWITCH_CHANNEL}\n".encode('utf-8'))
-sock.send("CAP REQ :twitch.tv/tags\n".encode('utf-8'))
+def main():
+    # create and connect socket
+    sock = socket.socket()
+    sock.connect((TWITCH_SERVER, int(TWITCH_PORT)))
+    sock.send(f"PASS {TWITCH_OAUTH_TOKEN}\n".encode('utf-8'))
+    sock.send(f"NICK {TWITCH_NICKNAME}\n".encode('utf-8'))
+    sock.send(f"JOIN {TWITCH_CHANNEL}\n".encode('utf-8'))
+    sock.send("CAP REQ :twitch.tv/tags\n".encode('utf-8'))
 
-try:
-    while True:
-        resp = sock.recv(2048).decode('utf-8')
-        resp_list = resp.split()
 
-        if resp.startswith('PING'):
-            sock.send("PONG\n".encode('utf-8'))
+    # create list to keep track of pipeline ids
+    ids = []
 
-        elif (resp_list[2] == 'PRIVMSG') and (isMod(resp_list[0])):
-            # this is a message from mod, extract it
-            mod_message = resp_list[4].strip(':')
-            if mod_message.startswith('link: '):
-                link = mod_message.strip('link: ')
+    try:
+        while True:
+            resp = sock.recv(2048).decode('utf-8')
+            resp_list = resp.split()
 
-                # send link to ai_api
-                message = {'link' : link}
-                with requests.post(f'{AI_API_ENDPOINT}/queue',
-                                  headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)}, json=message) as response:
-                    print(response.text)
+            if resp.startswith('PING'):
+                sock.send("PONG\n".encode('utf-8'))
 
-except Exception as e:
-    raise
+            elif (resp_list[2] == 'PRIVMSG') and (isMod(resp_list[0])):
+                # this is a message from mod, extract it
+                mod_message = resp_list[4].strip(':')
+                if mod_message.startswith('link: '):
+                    link = mod_message.strip('link: ')
 
-finally:
-    # close socket
-    sock.close()
+                    # send link to ai_api
+                    message = {'link' : link}
+                    with requests.post(f'{AI_API_ENDPOINT}/queue',
+                                      headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)}, json=message) as response:
+
+                        # response the id for the pipeline
+                        ids.append(response.json().get('id'))
+                        print(f'appended pipeline with id: {ids[-1]}')
+
+    except Exception as e:
+        raise
+
+    finally:
+        # close socket
+        sock.close()
+
+
+if __name__ == '__main__':
+    main()
 
 
 

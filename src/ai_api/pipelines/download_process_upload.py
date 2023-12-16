@@ -19,13 +19,14 @@ SOUNDFONT_PATH = os.getenv('SOUNDFONT_PATH')
 PROCESSED_DIR = os.getenv('PROCESSED_DIR')
 
 
-def download_process_upload(link: str):
+def download_process_upload(link: str, uuid_path: str):
     """
     Takes a youtube link as input and runs AI over it and converts to gameboy inputs.
     Uploads the results to google drive (the framed notes AND .wav file)
     along with a thread object for playing the song. So adds a tuple to the queue of the form:
     (list of framed notes, tuple for playing song)
     :param link: a youtube link
+    :param uuid: a string unique identifier file for pipeline
     """
 
     # assignment for cleanup
@@ -99,6 +100,10 @@ def download_process_upload(link: str):
                 os.remove(midi_abs_path)
             if os.path.isfile(json_abs_path):
                 os.remove(json_abs_path)
+
+        # write failed to uuid file
+        with open(uuid_path, 'w') as fp:
+            fp.write('failed')
         raise
 
     finally:

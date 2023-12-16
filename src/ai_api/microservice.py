@@ -16,11 +16,13 @@ app = Flask(__name__)
 
 app.config['SECRET_KEY'] = os.getenv('API_TOKEN')
 app.config['PORT'] = os.getenv('PORT')
+app.config['MAX_QUEUE_SIZE'] = os.getenv('MAX_SIZE')
 
 
 MIDI_DIR = os.getenv('MIDI_DIR')
 PLAYABLE_DIR = os.getenv('PLAYABLE_DIR')
 PROCESSED_DIR = os.getenv('PROCESSED_DIR')
+ID_DIR = os.getenv('ID_DIR')
 
 
 def key_required(f):
@@ -45,6 +47,8 @@ def key_required(f):
     return decorator
 
 
+
+
 def generate_unique_key():
     """
     Generates a unique string key
@@ -59,7 +63,15 @@ def generate_unique_key():
 @key_required
 def queue():
 
+    # initialise
+    pipeline_file_path = ''
+
     try:
+
+        if len(os.listdir(ID_DIR)) > app.config['MAX_QUEUE_SIZE']:
+            return jsonify({'message': 'error: the queue is full — please try again later'}), 503
+
+        # check if queue full
         data = request.get_json()
 
         # check that data is properly formatted
@@ -68,13 +80,27 @@ def queue():
 
         link = data['link']
 
+
+
         # run ai over song
-        multiprocessing.Process(target=download_process_upload, args=(link,)).start()
+        pipeline_uuid = generate_unique_key()
+
+        # save id to keep track
+        pipeline_file_path = os.path.join(ID_DIR, pipeline_uuid)
+        with open(pipeline_file_path, 'w') as file:
+            file.write('running')
+
+        multiprocessing.Process(target=download_process_upload, args=(link, pipeline_uuid)).start()
+
+
+        # response
         return jsonify({'message': 'successfully uploaded file, running AI over music...',
-                        'id' : generate_unique_key()}), 202
+                        'id': pipeline_uuid}), 202
 
     except Exception as e:
         # exception occurred
+        if os.path.isfile(pipeline_file_path):
+            os.remove(pipeline_file_path)
         return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
 
 
