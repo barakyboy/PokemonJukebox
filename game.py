@@ -8,16 +8,44 @@ from src.utilities.Screen import Screen
 from src.utilities.FrameConverter import FrameConverter
 from queue import Queue
 from src.utilities.Signal import Signal
+from src.pipelines.check_save_queue import check_save_queue
+import requests
+import sys
+import threading
+import time
 
 
-def main(q: Queue, sig_q: Queue):
+load_dotenv()
+sys.path.append(os.getenv('PYTHONPATH'))
+SLEEP_TIME = int(os.getenv('SLEEP_TIME'))
+GAME_PATH = os.getenv('GAME_PATH')
+
+def pipeline_manager(q: Queue):
+    f"""
+    A pipeline manager for the game. Checks for completed pipelines every {SLEEP_TIME} seconds
+    :param q: the song queue
+    """
+    while True:
+
+        # block for SLEEP_TIME
+        time.sleep(SLEEP_TIME)
+
+        # check for completed pipelines
+        threading.Thread(target=check_save_queue, args=(q,)).start()
+
+
+
+def main():
     """
     :param q: a queue for managing the songs that are queued
     :param sig_q: a queue containing signals for inter thread communication
     """
 
-    load_dotenv()
-    GAME_PATH = os.getenv('GAME_PATH')
+    # initialise game queue
+    q = Queue()
+
+    # create pipeline manager thread
+    threading.Thread(target=pipeline_manager, args=(q,)).start()
 
     # initialise controls dictionary
     release_dict = dict()
@@ -49,12 +77,6 @@ def main(q: Queue, sig_q: Queue):
         # game loop
         while not pyboy.tick():
 
-            # process any signals that have arrived
-            while not sig_q.empty():
-                signal = sig_q.get()
-                if signal == Signal.QUIT:
-                    return
-
             # check if no more instructions
             if curr is None:
 
@@ -66,12 +88,6 @@ def main(q: Queue, sig_q: Queue):
 
                     # give control back to player (for loading game, etc)
                     pyboy.tick()
-
-                    # process any signals that have arrived
-                    while not sig_q.empty():
-                        signal = sig_q.get()
-                        if signal == Signal.QUIT:
-                            return
 
                 # queue is no longer empty, extract next song
                 framed_notes, t = q.get()
