@@ -1,26 +1,28 @@
 # a flask microservice used to run basic-pitch AI over an mp3 file
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from functools import wraps
 from dotenv import load_dotenv
 import os
-from src.utilities.MusicDownloader import MusicDownloader
-from basic_pitch.inference import predict
-from basic_pitch import ICASSP_2022_MODEL_PATH
-import tensorflow as tf
-import threading
-import queue
+import multiprocessing
+from pipelines.download_process_upload import download_process_upload, PipelineStatus
+import json
+import uuid
+import time
+
 
 load_dotenv()
 
 app = Flask(__name__)
 
-app.config['OGG_DIR'] = os.getenv('OGG_DIR')
-app.config['SECRET_KEY'] = os.getenv('PYTHONANYWHERE_API_TOKEN')
+app.config['SECRET_KEY'] = os.getenv('API_TOKEN')
 app.config['PORT'] = os.getenv('PORT')
-app.config['MODEL'] = tf.saved_model.load(str(ICASSP_2022_MODEL_PATH))
+app.config['MAX_QUEUE_SIZE'] = os.getenv('MAX_SIZE')
 
-# song queue
-q = queue.Queue()
+
+MIDI_DIR = os.getenv('MIDI_DIR')
+PLAYABLE_DIR = os.getenv('PLAYABLE_DIR')
+PROCESSED_DIR = os.getenv('PROCESSED_DIR')
+ID_DIR = os.getenv('ID_DIR')
 
 
 def key_required(f):
@@ -45,72 +47,205 @@ def key_required(f):
     return decorator
 
 
+
+
+def generate_unique_key():
+    """
+    Generates a unique string key
+    :return: a unique string key
+    """
+    timestamp = str(int(time.time() * 1000))
+    unique_id = str(uuid.uuid4().hex)
+    key = timestamp + unique_id
+    return key
+
 @app.route("/queue", methods=['POST'])
 @key_required
 def queue():
 
-    def run_ai(song_abs_path: str):
-        """
-        runs the ai over the song and queues the pretty midi result.
-        :param song_abs_path: the absolute path of the song the ai is running over
-        """
+    # initialise
+    pipeline_file_path = ''
 
-        try:
-            # run AI over video
-            midi_data = predict(audio_path=song_abs_path, model_or_model_path=app.config['MODEL'])[1]
-            print('finished analysing midi data')
-            q.put(midi_data)
+    try:
 
-        except Exception as e:
-            q.put(e)
+        if len(os.listdir(ID_DIR)) > int(app.config['MAX_QUEUE_SIZE']):
+            return jsonify({'message': 'error: the queue is full — please try again later'}), 503
 
-        finally:
-            if os.path.isfile(song_abs_path):
-                os.remove(song_abs_path)
+        # check if queue full
+        data = request.get_json()
+
+        # check that data is properly formatted
+        if 'link' not in data:
+            return jsonify({'message': 'error: please provide a link'}), 400
+
+        link = data['link']
 
 
 
-    if 'file' not in request.files:
-        return jsonify({'error': 'no file key provided'}), 400
+        # run ai over song
+        pipeline_uuid = generate_unique_key()
 
-    file = request.files['file']
+        # save id to keep track
+        pipeline_file_path = os.path.join(ID_DIR, pipeline_uuid)
+        with open(pipeline_file_path, 'w') as file:
+            file.write(str(PipelineStatus.RUNNING.value))
 
-    # acquire lock for determining filename
-    mutex = threading.Lock()
+        multiprocessing.Process(target=download_process_upload, args=(link, pipeline_uuid)).start()
 
-    # get a file name and save the file
-    with mutex:
-        i = 0
-        candidate_path = os.path.join(app.config['OGG_DIR'], str(i)) + ".ogg"
-        while os.path.isfile(candidate_path):
-            i += 1
-            candidate_path = os.path.join(app.config['OGG_DIR'], str(i)) + ".ogg"
 
-        # save file to path
-        ogg_abs_path = candidate_path
-        file.save(ogg_abs_path)
+        # response
+        return jsonify({'message': 'successfully uploaded file, running AI over music...',
+                        'id': pipeline_uuid}), 202
 
-    # run ai over song
-    threading.Thread(target=run_ai, args=(ogg_abs_path,)).start()
-    return jsonify({'message': 'successfully uploaded file, running AI over music...'}), 202
-
+    except Exception as e:
+        # exception occurred
+        if os.path.isfile(pipeline_file_path):
+            os.remove(pipeline_file_path)
+        return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
 
 
 @app.route("/dequeue", methods=['GET'])
 @key_required
 def dequeue():
-    if not q.empty():
-        head = q.get()
-        if issubclass(head, Exception):
+    mutex = multiprocessing.Lock()
+    with mutex:
+        try:
 
+            # look for a json file; if exists, get its number and associated file
+            if len(os.listdir(PROCESSED_DIR)) == 0:
+                return jsonify({'message': 'there are currently no files ready!'}), 202
+
+            # if got to this point, file exists; get the associated number and data
+            i = os.listdir(PROCESSED_DIR)[0].strip(".json")
+            json_abs_path = os.path.join(PROCESSED_DIR, str(i)) + ".json"
+
+            # return the dictionary version of framed notes, along with name of
+            with open(json_abs_path, 'r') as json_file:
+                dict_framed_notes = json.load(json_file)
+
+                # add file id for file download
+                dict_framed_notes['file_id'] = i
+
+                # remove json file so that can dequeue other songs
+                os.remove(json_abs_path)
+
+                return jsonify(dict_framed_notes), 200
+
+        except Exception as e:
             # exception occurred
-            return jsonify({'message': 'error: an error has occurred while running AI over the data: ' + str(head)}),\
-                   500
-        else:
-            return jsonify(head), 200
-    else:
-        return jsonify({'message': 'the queue is empty!'}), 204
+            return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
 
 
-if __name__ == '__main__':
-    app.run(port=app.config['PORT'])
+@app.route('/download', methods=['POST'])
+@key_required
+def download_wav():
+    try:
+        data = request.get_json()
+
+        # check that data is properly formatted
+        if 'file_id' not in data:
+            return jsonify({'message': 'error: please provide a file_id'}), 400
+
+        file_id = data['file_id']
+        audio_relative_path = str(file_id) + ".wav"
+        return send_from_directory(PLAYABLE_DIR, audio_relative_path)
+
+    except Exception as e:
+        # exception occurred
+        return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
+
+
+@app.route('/clean', methods=['POST'])
+@key_required
+def clean():
+    """
+    a function to clean up wav file and midi file in order to free up name and space, executed after download
+    """
+    try:
+        data = request.get_json()
+        # check that data is properly formatted
+        if 'file_id' not in data:
+            return jsonify({'message': 'error: please provide a file_id'}), 400
+
+        file_id = data['file_id']
+        audio_abs_path = os.path.join(PLAYABLE_DIR, file_id) + ".wav"
+        midi_abs_path = os.path.join(MIDI_DIR, file_id) + ".mid"
+
+        # delete files
+        os.remove(audio_abs_path)
+        os.remove(midi_abs_path)
+
+        return jsonify({"message": "successfully deleted all files"}), 200
+
+    except Exception as e:
+        # exception occurred
+        return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
+
+
+@app.route("/status", methods=['POST'])
+@key_required
+def check_status():
+    f"""
+    Checks the status of pipelines with ids requested in JSON. If a pipeline has failed status, delete that pipeline
+    id record. If
+    :return: a JSON representing the status of each pipeline_uuid. Each pipeline_uuid is returned as a key.
+    the values have the following meaning:
+    {PipelineStatus.RUNNING.value} : running
+    {PipelineStatus.FAILED.value} : failed
+    {PipelineStatus.COMPLETE.value} : complete
+    {PipelineStatus.QUEUED.value} : queued (this meaning is perserved only if you know that the pipeline uuid represents
+    a pipeline which has previously been running)
+    """
+    try:
+        # extract list of ids
+        data = request.get_json()
+
+        # check that data is properly formatted
+        if 'pipeline_uuids' not in data:
+            return jsonify({'message': 'error: please provide a list under key pipeline_uuids'}), 400
+
+        pipeline_uuids = data['pipeline_uuids']
+
+        # check on status of each pipeline_uuid
+        response = {}
+        for pipeline_uuid in pipeline_uuids:
+            pipeline_uuid_path = os.path.join(ID_DIR, pipeline_uuid)
+            if os.path.isfile(pipeline_uuid_path):
+                # still exists, open file
+                with open(pipeline_uuid_path, 'r') as fp:
+
+                    # add status of uuid to response
+                    status = int(fp.read())
+
+                response[pipeline_uuid] = status
+
+                # delete if failed
+                if status == PipelineStatus.FAILED.value:
+                    os.remove(pipeline_uuid_path)
+            else:
+
+                # file no longer exists indicating queued
+                response[pipeline_uuid] = PipelineStatus.QUEUED.value
+
+        return jsonify(response), 200
+
+    except Exception as e:
+        # exception occurred
+        return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
