@@ -88,7 +88,7 @@ def queue():
         # save id to keep track
         pipeline_file_path = os.path.join(ID_DIR, pipeline_uuid)
         with open(pipeline_file_path, 'w') as file:
-            file.write(PipelineStatus.RUNNING.value)
+            file.write(str(PipelineStatus.RUNNING.value))
 
         multiprocessing.Process(target=download_process_upload, args=(link, pipeline_uuid)).start()
 
