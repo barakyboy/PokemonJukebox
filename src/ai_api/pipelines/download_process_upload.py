@@ -11,6 +11,7 @@ import multiprocessing
 import os
 from dotenv import load_dotenv
 from midi2audio import FluidSynth
+from enum import Enum, auto
 
 load_dotenv()
 MIDI_DIR = os.getenv('MIDI_DIR')
@@ -18,6 +19,11 @@ PLAYABLE_DIR = os.getenv('PLAYABLE_DIR')
 SOUNDFONT_PATH = os.getenv('SOUNDFONT_PATH')
 PROCESSED_DIR = os.getenv('PROCESSED_DIR')
 
+
+class PipelineStatus(Enum):
+    RUNNING = auto()
+    FAILED = auto()
+    COMPLETE = auto()
 
 def download_process_upload(link: str, uuid_path: str):
     """
@@ -90,6 +96,10 @@ def download_process_upload(link: str, uuid_path: str):
             with open(json_abs_path, 'w') as json_file:
                 json_file.write(json.dumps(FrameConverter().frame_to_dic(framed_notes)))
 
+            # mark job as complete
+            with open(uuid_path, 'w') as fp:
+                fp.write(str(PipelineStatus.COMPLETE.value))
+
     except Exception as e:
         # delete audio file
         mutex = multiprocessing.Lock()
@@ -103,7 +113,7 @@ def download_process_upload(link: str, uuid_path: str):
 
         # write failed to uuid file
         with open(uuid_path, 'w') as fp:
-            fp.write('failed')
+            fp.write(str(PipelineStatus.FAILED.value))
         raise
 
     finally:

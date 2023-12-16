@@ -42,10 +42,6 @@ def main():
     sock.send(f"JOIN {TWITCH_CHANNEL}\n".encode('utf-8'))
     sock.send("CAP REQ :twitch.tv/tags\n".encode('utf-8'))
 
-
-    # create list to keep track of pipeline ids
-    ids = []
-
     try:
         while True:
             resp = sock.recv(2048).decode('utf-8')
@@ -66,8 +62,7 @@ def main():
                                       headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)}, json=message) as response:
 
                         # response the id for the pipeline
-                        ids.append(response.json().get('id'))
-                        print(f'appended pipeline with id: {ids[-1]}')
+                        print(f"appended pipeline with id: {response.json().get('id')}")
 
     except Exception as e:
         raise

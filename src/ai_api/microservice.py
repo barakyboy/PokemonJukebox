@@ -4,7 +4,7 @@ from functools import wraps
 from dotenv import load_dotenv
 import os
 import multiprocessing
-from pipelines.download_process_upload import download_process_upload
+from pipelines.download_process_upload import download_process_upload, PipelineStatus
 import json
 import uuid
 import time
@@ -88,7 +88,7 @@ def queue():
         # save id to keep track
         pipeline_file_path = os.path.join(ID_DIR, pipeline_uuid)
         with open(pipeline_file_path, 'w') as file:
-            file.write('running')
+            file.write(PipelineStatus.RUNNING.value)
 
         multiprocessing.Process(target=download_process_upload, args=(link, pipeline_uuid)).start()
 
@@ -180,6 +180,17 @@ def clean():
     except Exception as e:
         # exception occurred
         return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
+
+@app.route("/status", methods=['POST'])
+@key_required
+def check_status():
+    """
+    Checks the status of pipelines with ids requested in JSON. If a pipeline has failed status, delete that pipeline
+    id record. If
+    :return:
+    """
+
+    # extract list of ids
 
 
 
