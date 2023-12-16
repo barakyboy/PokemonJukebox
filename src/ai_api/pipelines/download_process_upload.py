@@ -21,10 +21,10 @@ PROCESSED_DIR = os.getenv('PROCESSED_DIR')
 
 
 class PipelineStatus(Enum):
-    RUNNING = auto()
-    FAILED = auto()
-    COMPLETE = auto()
-    QUEUED = auto() # used to denote that the pipeline if queued on the gameboy queue
+    RUNNING = 0
+    FAILED = 1
+    COMPLETE = 2
+    QUEUED = 3 # used to denote that the pipeline if queued on the gameboy queue
 
 def download_process_upload(link: str, uuid_path: str):
     """

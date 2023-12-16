@@ -5,6 +5,7 @@ import dotenv
 import os
 import requests
 import threading
+import time
 
 dotenv.load_dotenv()
 TWITCH_SERVER = os.getenv('TWITCH_SERVER')
@@ -14,6 +15,7 @@ TWITCH_NICKNAME = os.getenv('TWITCH_NICKNAME')
 TWITCH_CHANNEL = os.getenv('TWITCH_CHANNEL')
 AI_API_TOKEN = os.getenv('AI_API_TOKEN')
 AI_API_ENDPOINT = os.getenv('AI_API_ENDPOINT')
+CHECK_FREQ = int(os.getenv('CHECK_FREQ'))
 
 
 def isMod(badge: str):
@@ -31,9 +33,58 @@ def isMod(badge: str):
     return False
 
 
+def status_loop(pipeline_list: list):
+    f"""
+    queries the ai_api every {CHECK_FREQ} seconds to check on status of running pipelines. Then sends this data
+    to the front end.
+    : param pipeline_list: a list of pipeline uuids
+    """
+
+    # mutex for iterating over list
+    mutex = threading.Lock()
+
+    while True:
+
+        # block thread for an amount of time
+        time.sleep(CHECK_FREQ)
+
+        # check on status
+        message = {'pipeline_uuids': pipeline_list}
+        with mutex:
+            with requests.post(f'{AI_API_ENDPOINT}/status',
+                               headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)}, json=message) as response:
+
+                if response.status_code == 200:
+                    response_dict = response.json()
+                    to_delete = []
+                    for pipeline_uuid in response.keys():
+                        ## TO DO: CODE TO CREATE RESPONSE FOR FRONT END HERE
+                        if (response_dict[pipeline_uuid] == 1) or (response_dict[pipeline_uuid] == 3):
+                            # failed or completed
+                            to_delete.append(pipeline_uuid)
+
+                    # send to front end
+
+
+                    # delete failed or completed from pipeline list
+                    for pipeline_uuid in to_delete:
+                        pipeline_list.remove(pipeline_uuid)
+
+                else:
+                    print(response.text)
 
 
 def main():
+    # create list to keep track of pipelines
+    pipelines = list()
+
+    # create mutex for multithreading
+    mutex = threading.Lock()
+
+    # start status_loop
+    threading.Thread(target=status_loop, args=(pipelines,)).start()
+
+
     # create and connect socket
     sock = socket.socket()
     sock.connect((TWITCH_SERVER, int(TWITCH_PORT)))
@@ -61,8 +112,11 @@ def main():
                     with requests.post(f'{AI_API_ENDPOINT}/queue',
                                       headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)}, json=message) as response:
 
-                        # response the id for the pipeline
-                        print(f"appended pipeline with id: {response.json().get('id')}")
+                        # add id to list
+                        with mutex:
+                            response_uuid = response.json().get('id')
+                            pipelines.append(response_uuid)
+                            print(f"appended pipeline with id: {response_uuid}")
 
     except Exception as e:
         raise

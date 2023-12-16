@@ -7,7 +7,7 @@ FROM python:3.10-alpine
 WORKDIR /app
 
 # copy items into working dir
-COPY . /app
+COPY twitch /app
 
 RUN pip install -r twitch-service-requirements.txt
 
