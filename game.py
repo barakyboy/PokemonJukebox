@@ -119,5 +119,6 @@ def main(q: Queue, sig_q: Queue):
             frame_num += 1
 
 
-
+if __name__ == '__main__':
+    main()
 
