@@ -59,6 +59,7 @@ def status_loop(pipeline_list: list):
                     to_delete = []
                     for pipeline_uuid in response.keys():
                         ## TO DO: CODE TO CREATE RESPONSE FOR FRONT END HERE
+                        print(f'{pipeline_uuid} : {response_dict[pipeline_uuid]}')
                         if (response_dict[pipeline_uuid] == 1) or (response_dict[pipeline_uuid] == 3):
                             # failed or completed
                             to_delete.append(pipeline_uuid)

@@ -68,7 +68,7 @@ def queue():
 
     try:
 
-        if len(os.listdir(ID_DIR)) > app.config['MAX_QUEUE_SIZE']:
+        if len(os.listdir(ID_DIR)) > int(app.config['MAX_QUEUE_SIZE']):
             return jsonify({'message': 'error: the queue is full — please try again later'}), 503
 
         # check if queue full
