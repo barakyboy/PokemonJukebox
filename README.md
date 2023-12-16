@@ -41,3 +41,7 @@ To be set up, you must simply set the following .env files in the following loca
 
 You will also need a gameboy ROM of a Pokémon (or any other) game
 
+## Assets
+A picture of a labeled gameboy is provided in img/gameboy_labled.png.
+This picture is used to render the gameboy inputs in real time.
+
