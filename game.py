@@ -13,6 +13,7 @@ import requests
 import sys
 import threading
 import time
+import logging
 
 
 load_dotenv()
@@ -20,18 +21,25 @@ sys.path.append(os.getenv('PYTHONPATH'))
 SLEEP_TIME = int(os.getenv('SLEEP_TIME'))
 GAME_PATH = os.getenv('GAME_PATH')
 
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
+
 def pipeline_manager(q: Queue):
     f"""
     A pipeline manager for the game. Checks for completed pipelines every {SLEEP_TIME} seconds
     :param q: the song queue
     """
     while True:
+        try:
+            # block for SLEEP_TIME
+            logging.debug(f"pipeline manager sleeping for {SLEEP_TIME} seconds")
+            time.sleep(SLEEP_TIME)
 
-        # block for SLEEP_TIME
-        time.sleep(SLEEP_TIME)
+            # check for completed pipelines
+            logging.debug(f"pipeline manager woke up! Checking for completed pipelines...")
+            threading.Thread(target=check_save_queue, args=(q,)).start()
 
-        # check for completed pipelines
-        threading.Thread(target=check_save_queue, args=(q,)).start()
+        except Exception as e:
+            logging.exception(e)
 
 
 

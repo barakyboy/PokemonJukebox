@@ -12,6 +12,7 @@ import os
 from dotenv import load_dotenv
 from midi2audio import FluidSynth
 from enum import Enum
+import logging
 
 load_dotenv()
 MIDI_DIR = os.getenv('MIDI_DIR')
@@ -34,7 +35,7 @@ def download_process_upload(link: str, uuid_path: str):
     along with a thread object for playing the song. So adds a tuple to the queue of the form:
     (list of framed notes, tuple for playing song)
     :param link: a youtube link
-    :param uuid: a string unique identifier file for pipeline
+    :param uuid_path: a  path of file named with string unique identifier file for pipeline
     """
 
     # assignment for cleanup
@@ -103,7 +104,11 @@ def download_process_upload(link: str, uuid_path: str):
             with open(uuid_path, 'w') as fp:
                 fp.write(str(PipelineStatus.COMPLETE.value))
 
+            # log info
+            logging.info(f"Pipeline with file at {uuid_path} completed!")
+
     except Exception as e:
+        logging.exception(e)
         # delete audio file
         mutex = multiprocessing.Lock()
         with mutex:
@@ -117,10 +122,8 @@ def download_process_upload(link: str, uuid_path: str):
             # write failed to uuid file
             with open(uuid_path, 'w') as fp:
                 fp.write(str(PipelineStatus.FAILED.value))
-        raise
 
     finally:
-
         # delete audio file
         mutex = multiprocessing.Lock()
         with mutex:
