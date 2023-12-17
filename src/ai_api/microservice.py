@@ -123,6 +123,7 @@ def dequeue():
 
             # look for a json file; if exists, get its number and associated file
             if len(os.listdir(PROCESSED_DIR)) == 0:
+                app.logger.debug(f"Cannot dequeue; queue is empty!")
                 return jsonify({'message': 'there are currently no files ready!'}), 202
 
             # if got to this point, file exists; get the associated number and data
@@ -139,10 +140,12 @@ def dequeue():
                 # remove json file so that can dequeue other songs
                 os.remove(json_abs_path)
 
+                app.logger.info(f"Successfully dequeued framed notes and file_id {i}")
                 return jsonify(dict_framed_notes), 200
 
         except Exception as e:
             # exception occurred
+            app.logger.exception(e)
             return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
 
 
@@ -154,14 +157,18 @@ def download_wav():
 
         # check that data is properly formatted
         if 'file_id' not in data:
+            app.logger.debug("Cannot download wav: No file_id provided")
             return jsonify({'message': 'error: please provide a file_id'}), 400
 
         file_id = data['file_id']
         audio_relative_path = str(file_id) + ".wav"
+
+        app.logger.info(f"Sending wav: {audio_relative_path}")
         return send_from_directory(PLAYABLE_DIR, audio_relative_path)
 
     except Exception as e:
         # exception occurred
+        app.logger.exception(e)
         return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
 
 
@@ -175,6 +182,7 @@ def clean():
         data = request.get_json()
         # check that data is properly formatted
         if 'file_id' not in data:
+            app.logger.debug("Cannot clean files: no file_id provided!")
             return jsonify({'message': 'error: please provide a file_id'}), 400
 
         file_id = data['file_id']
@@ -185,10 +193,12 @@ def clean():
         os.remove(audio_abs_path)
         os.remove(midi_abs_path)
 
+        app.logger.info(f"successfully deleted {audio_abs_path} and {midi_abs_path}")
         return jsonify({"message": "successfully deleted all files"}), 200
 
     except Exception as e:
         # exception occurred
+        app.logger.exception(e)
         return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
 
 
@@ -212,6 +222,7 @@ def check_status():
 
         # check that data is properly formatted
         if 'pipeline_uuids' not in data:
+            app.logger.debug("Cannot provide pipeline status, no pipeline_uuids key provided!")
             return jsonify({'message': 'error: please provide a list under key pipeline_uuids'}), 400
 
         pipeline_uuids = data['pipeline_uuids']
@@ -241,25 +252,11 @@ def check_status():
                     # file no longer exists indicating queued
                     response[pipeline_uuid] = PipelineStatus.QUEUED.value
 
+            app.logger.info(f"Returning pipeline status:\n {response}")
             return jsonify(response), 200
 
     except Exception as e:
         # exception occurred
+        app.logger.exception(e)
         return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
