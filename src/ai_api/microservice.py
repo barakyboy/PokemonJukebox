@@ -98,7 +98,7 @@ def queue():
         with open(pipeline_file_path, 'w') as file:
             file.write(str(PipelineStatus.RUNNING.value))
 
-        multiprocessing.Process(target=download_process_upload, args=(link, pipeline_uuid)).start()
+        multiprocessing.Process(target=download_process_upload, args=(link, pipeline_file_path)).start()
 
 
         # response

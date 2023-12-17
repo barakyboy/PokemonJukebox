@@ -34,7 +34,7 @@ def download_process_upload(link: str, uuid_path: str):
     along with a thread object for playing the song. So adds a tuple to the queue of the form:
     (list of framed notes, tuple for playing song)
     :param link: a youtube link
-    :param uuid: a string unique identifier file for pipeline
+    :param uuid_path: a  path of file named with string unique identifier file for pipeline
     """
 
     # assignment for cleanup
