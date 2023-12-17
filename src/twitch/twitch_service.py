@@ -70,7 +70,7 @@ def status_loop(pipeline_list: list):
             message = {'pipeline_uuids': pipeline_list}
             with mutex:
                 with requests.post(f'{AI_API_ENDPOINT}/status',
-                                   headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)}, json=message, verify=False) as response:
+                                   headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)}, json=message) as response:
 
                     if response.status_code == 200:
                         response_dict = response.json()
@@ -138,8 +138,8 @@ def main():
                     # send link to ai_api
                     message = {'link': link}
                     with requests.post(f'{AI_API_ENDPOINT}/queue',
-                                      headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)},
-                                       json=message, verify=False) as response:
+                                       headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)},
+                                       json=message) as response:
 
                         # add id to list
                         with mutex:
