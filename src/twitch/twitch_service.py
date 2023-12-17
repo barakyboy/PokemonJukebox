@@ -57,7 +57,7 @@ def status_loop(pipeline_list: list):
                 if response.status_code == 200:
                     response_dict = response.json()
                     to_delete = []
-                    for pipeline_uuid in response.keys():
+                    for pipeline_uuid in response_dict.keys():
                         ## TO DO: CODE TO CREATE RESPONSE FOR FRONT END HERE
                         print(f'{pipeline_uuid} : {response_dict[pipeline_uuid]}')
                         if (response_dict[pipeline_uuid] == 1) or (response_dict[pipeline_uuid] == 3):
