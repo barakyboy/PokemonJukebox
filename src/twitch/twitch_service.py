@@ -33,6 +33,20 @@ def isMod(badge: str):
 
     return False
 
+def isBroadcaster(badge: str):
+    """
+    Returns true if the badge comes from a moderator or broadcaster
+    :param badge: a badge returned by IRC
+    :return: a boolean value denoting whether the user is a broadcaster
+    """
+    badge_list = badge.split(';')
+    for badge in badge_list:
+        if badge.startswith('badges='):
+            # check whether broadcaster
+            return badge.strip('badges=') == 'broadcaster/1'
+
+    return False
+
 
 def status_loop(pipeline_list: list):
     f"""
@@ -82,7 +96,7 @@ def status_loop(pipeline_list: list):
 def main():
 
     # initialise logger
-    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s')
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
     # create list to keep track of pipelines
     pipelines = list()
 
@@ -111,8 +125,8 @@ def main():
             if resp.startswith('PING'):
                 sock.send("PONG\n".encode('utf-8'))
 
-            elif (resp_list[2] == 'PRIVMSG') and (isMod(resp_list[0])):
-                # this is a message from mod, extract it
+            elif (resp_list[2] == 'PRIVMSG') and (isMod(resp_list[0]) or isBroadcaster(resp_list[0])):
+                # this is a message from mod or broadcaster, extract it
                 mod_message = resp_list[4].strip(':')
                 if mod_message.startswith('link: '):
                     link = mod_message.strip('link: ')
