@@ -11,7 +11,7 @@ import multiprocessing
 import os
 from dotenv import load_dotenv
 from midi2audio import FluidSynth
-from enum import Enum, auto
+from enum import Enum
 
 load_dotenv()
 MIDI_DIR = os.getenv('MIDI_DIR')

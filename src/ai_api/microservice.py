@@ -209,7 +209,7 @@ def check_status():
         # check on status of each pipeline_uuid
         response = {}
 
-        # create mutx
+        # create mutex
         mutex = multiprocessing.Lock()
         with mutex:
             for pipeline_uuid in pipeline_uuids:
