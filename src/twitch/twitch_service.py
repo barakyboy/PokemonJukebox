@@ -43,7 +43,7 @@ def isBroadcaster(badge: str):
     for badge in badge_list:
         if badge.startswith('badges='):
             # check whether broadcaster
-            return badge.strip('badges=') == 'broadcaster/1'
+            return badge[len('badges='):] == 'broadcaster/1'
 
     return False
 
@@ -126,13 +126,15 @@ def main():
                 sock.send("PONG\n".encode('utf-8'))
 
             elif (resp_list[2] == 'PRIVMSG') and (isMod(resp_list[0]) or isBroadcaster(resp_list[0])):
+                logging.debug("Last received message is from mod or broadcaster")
                 # this is a message from mod or broadcaster, extract it
-                mod_message = resp_list[4].strip(':')
-                if mod_message.startswith('link: '):
-                    link = mod_message.strip('link: ')
+                # remove starting semicolon
+                mod_message = resp_list[4][1:]
+                if mod_message.startswith('link:'):
+                    link = mod_message[len('link:'):]
 
                     # send link to ai_api
-                    message = {'link' : link}
+                    message = {'link': link}
                     with requests.post(f'{AI_API_ENDPOINT}/queue',
                                       headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)}, json=message) as response:
 
