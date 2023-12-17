@@ -21,6 +21,8 @@ sys.path.append(os.getenv('PYTHONPATH'))
 SLEEP_TIME = int(os.getenv('SLEEP_TIME'))
 GAME_PATH = os.getenv('GAME_PATH')
 
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
+
 def pipeline_manager(q: Queue):
     f"""
     A pipeline manager for the game. Checks for completed pipelines every {SLEEP_TIME} seconds
@@ -29,7 +31,7 @@ def pipeline_manager(q: Queue):
     while True:
         try:
             # block for SLEEP_TIME
-            logging.debug(f"pipeline manager sleeping for {SLEEP_TIME}")
+            logging.debug(f"pipeline manager sleeping for {SLEEP_TIME} seconds")
             time.sleep(SLEEP_TIME)
 
             # check for completed pipelines
