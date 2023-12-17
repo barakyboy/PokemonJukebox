@@ -8,6 +8,7 @@ from pipelines.download_process_upload import download_process_upload, PipelineS
 import json
 import uuid
 import time
+import logging
 
 
 load_dotenv()
@@ -25,6 +26,9 @@ PROCESSED_DIR = os.getenv('PROCESSED_DIR')
 ID_DIR = os.getenv('ID_DIR')
 
 
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
+
+
 def key_required(f):
     """
     Authorization decorator
@@ -40,8 +44,10 @@ def key_required(f):
                                        "please include a key mapped to by 'Authorization'"}) , 401
 
         if key == app.config['SECRET_KEY']:
+            app.logger.debug(f"Authorized request from IP: {request.remote_addr}; ACCEPTED")
             return f(*args, **kwargs)
         else:
+            app.logger.debug(f"Unable to authorized request from IP: {request.remote_addr}; REJECTED")
             return jsonify({"message": "Invalid key; you are not authorised to use this service"}), 401
 
     return decorator
@@ -69,6 +75,7 @@ def queue():
     try:
 
         if len(os.listdir(ID_DIR)) > int(app.config['MAX_QUEUE_SIZE']):
+            app.logger.debug("Queueing failed; queue is full")
             return jsonify({'message': 'error: the queue is full — please try again later'}), 503
 
         # check if queue full
@@ -76,6 +83,7 @@ def queue():
 
         # check that data is properly formatted
         if 'link' not in data:
+            app.logger.debug("Rejected queue request: 'link' not provided")
             return jsonify({'message': 'error: please provide a link'}), 400
 
         link = data['link']
@@ -90,15 +98,17 @@ def queue():
         with open(pipeline_file_path, 'w') as file:
             file.write(str(PipelineStatus.RUNNING.value))
 
-        multiprocessing.Process(target=download_process_upload, args=(link, pipeline_uuid)).start()
+        multiprocessing.Process(target=download_process_upload, args=(link, pipeline_file_path)).start()
 
 
         # response
+        app.logger.info(f"Starting pipeline with id: {pipeline_uuid}")
         return jsonify({'message': 'successfully uploaded file, running AI over music...',
                         'id': pipeline_uuid}), 202
 
     except Exception as e:
         # exception occurred
+        app.logger.exception(e)
         if os.path.isfile(pipeline_file_path):
             os.remove(pipeline_file_path)
         return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
@@ -113,6 +123,7 @@ def dequeue():
 
             # look for a json file; if exists, get its number and associated file
             if len(os.listdir(PROCESSED_DIR)) == 0:
+                app.logger.debug(f"Cannot dequeue; queue is empty!")
                 return jsonify({'message': 'there are currently no files ready!'}), 202
 
             # if got to this point, file exists; get the associated number and data
@@ -129,10 +140,12 @@ def dequeue():
                 # remove json file so that can dequeue other songs
                 os.remove(json_abs_path)
 
+                app.logger.info(f"Successfully dequeued framed notes and file_id {i}")
                 return jsonify(dict_framed_notes), 200
 
         except Exception as e:
             # exception occurred
+            app.logger.exception(e)
             return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
 
 
@@ -144,14 +157,18 @@ def download_wav():
 
         # check that data is properly formatted
         if 'file_id' not in data:
+            app.logger.debug("Cannot download wav: No file_id provided")
             return jsonify({'message': 'error: please provide a file_id'}), 400
 
         file_id = data['file_id']
         audio_relative_path = str(file_id) + ".wav"
+
+        app.logger.info(f"Sending wav: {audio_relative_path}")
         return send_from_directory(PLAYABLE_DIR, audio_relative_path)
 
     except Exception as e:
         # exception occurred
+        app.logger.exception(e)
         return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
 
 
@@ -165,6 +182,7 @@ def clean():
         data = request.get_json()
         # check that data is properly formatted
         if 'file_id' not in data:
+            app.logger.debug("Cannot clean files: no file_id provided!")
             return jsonify({'message': 'error: please provide a file_id'}), 400
 
         file_id = data['file_id']
@@ -175,10 +193,12 @@ def clean():
         os.remove(audio_abs_path)
         os.remove(midi_abs_path)
 
+        app.logger.info(f"successfully deleted {audio_abs_path} and {midi_abs_path}")
         return jsonify({"message": "successfully deleted all files"}), 200
 
     except Exception as e:
         # exception occurred
+        app.logger.exception(e)
         return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
 
 
@@ -202,6 +222,7 @@ def check_status():
 
         # check that data is properly formatted
         if 'pipeline_uuids' not in data:
+            app.logger.debug("Cannot provide pipeline status, no pipeline_uuids key provided!")
             return jsonify({'message': 'error: please provide a list under key pipeline_uuids'}), 400
 
         pipeline_uuids = data['pipeline_uuids']
@@ -231,25 +252,11 @@ def check_status():
                     # file no longer exists indicating queued
                     response[pipeline_uuid] = PipelineStatus.QUEUED.value
 
+            app.logger.info(f"Returning pipeline status:\n {response}")
             return jsonify(response), 200
 
     except Exception as e:
         # exception occurred
+        app.logger.exception(e)
         return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

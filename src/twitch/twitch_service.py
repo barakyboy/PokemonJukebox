@@ -59,38 +59,40 @@ def status_loop(pipeline_list: list):
     mutex = threading.Lock()
 
     while True:
-
-        # block thread for an amount of time
-        logging.debug(f'status loop sleeping for {CHECK_FREQ} seconds...')
-        time.sleep(CHECK_FREQ)
-        logging.debug(f'status loop woke up!')
-
-
-        # check on status
-        message = {'pipeline_uuids': pipeline_list}
-        with mutex:
-            with requests.post(f'{AI_API_ENDPOINT}/status',
-                               headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)}, json=message) as response:
-
-                if response.status_code == 200:
-                    response_dict = response.json()
-                    to_delete = []
-                    for pipeline_uuid in response_dict.keys():
-                        ## TO DO: CODE TO CREATE RESPONSE FOR FRONT END HERE
-                        logging.info(f'pipeline status: {pipeline_uuid} : {response_dict[pipeline_uuid]}')
-                        if (response_dict[pipeline_uuid] == 1) or (response_dict[pipeline_uuid] == 3):
-                            # failed or completed
-                            to_delete.append(pipeline_uuid)
-
-                    # send to front end
+        try:
+            # block thread for an amount of time
+            logging.debug(f'status loop sleeping for {CHECK_FREQ} seconds...')
+            time.sleep(CHECK_FREQ)
+            logging.debug(f'status loop woke up!')
 
 
-                    # delete failed or completed from pipeline list
-                    for pipeline_uuid in to_delete:
-                        pipeline_list.remove(pipeline_uuid)
+            # check on status
+            message = {'pipeline_uuids': pipeline_list}
+            with mutex:
+                with requests.post(f'{AI_API_ENDPOINT}/status',
+                                   headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)}, json=message) as response:
 
-                else:
-                    logging.error(response.text)
+                    if response.status_code == 200:
+                        response_dict = response.json()
+                        to_delete = []
+                        for pipeline_uuid in response_dict.keys():
+                            ## TO DO: CODE TO CREATE RESPONSE FOR FRONT END HERE
+                            logging.info(f'pipeline status: {pipeline_uuid} : {response_dict[pipeline_uuid]}')
+                            if (response_dict[pipeline_uuid] == 1) or (response_dict[pipeline_uuid] == 3):
+                                # failed or completed
+                                to_delete.append(pipeline_uuid)
+
+                        # send to front end
+
+
+                        # delete failed or completed from pipeline list
+                        for pipeline_uuid in to_delete:
+                            pipeline_list.remove(pipeline_uuid)
+
+                    else:
+                        logging.error(response.text)
+        except Exception as e:
+            logging.exception(e)
 
 
 def main():
@@ -116,8 +118,8 @@ def main():
     sock.send("CAP REQ :twitch.tv/tags\n".encode('utf-8'))
     logging.debug("socket connection established")
 
-    try:
-        while True:
+    while True:
+        try:
             resp = sock.recv(2048).decode('utf-8')
             logging.info(f'socket response: {resp}')
             resp_list = resp.split()
@@ -136,7 +138,8 @@ def main():
                     # send link to ai_api
                     message = {'link': link}
                     with requests.post(f'{AI_API_ENDPOINT}/queue',
-                                      headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)}, json=message) as response:
+                                       headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)},
+                                       json=message) as response:
 
                         # add id to list
                         with mutex:
@@ -144,12 +147,11 @@ def main():
                             pipelines.append(response_uuid)
                             logging.info(f"appended pipeline with id: {response_uuid}")
 
-    except Exception as e:
-        raise
+        except Exception as e:
+            logging.exception(e)
 
-    finally:
-        # close socket
-        sock.close()
+    socket.close()
+
 
 
 if __name__ == '__main__':
