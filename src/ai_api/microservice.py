@@ -8,6 +8,7 @@ from pipelines.download_process_upload import download_process_upload, PipelineS
 import json
 import uuid
 import time
+import logging
 
 
 load_dotenv()
@@ -25,6 +26,9 @@ PROCESSED_DIR = os.getenv('PROCESSED_DIR')
 ID_DIR = os.getenv('ID_DIR')
 
 
+logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
+
+
 def key_required(f):
     """
     Authorization decorator
@@ -40,6 +44,7 @@ def key_required(f):
                                        "please include a key mapped to by 'Authorization'"}) , 401
 
         if key == app.config['SECRET_KEY']:
+            app.logger.debug(f"Authorized request from IP: {request.remote_addr}")
             return f(*args, **kwargs)
         else:
             return jsonify({"message": "Invalid key; you are not authorised to use this service"}), 401
@@ -69,6 +74,7 @@ def queue():
     try:
 
         if len(os.listdir(ID_DIR)) > int(app.config['MAX_QUEUE_SIZE']):
+            app.logger.debug("Queueing failed; queue is full")
             return jsonify({'message': 'error: the queue is full — please try again later'}), 503
 
         # check if queue full
