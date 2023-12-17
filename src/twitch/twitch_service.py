@@ -6,6 +6,7 @@ import os
 import requests
 import threading
 import time
+import logging
 
 dotenv.load_dotenv()
 TWITCH_SERVER = os.getenv('TWITCH_SERVER')
@@ -46,7 +47,10 @@ def status_loop(pipeline_list: list):
     while True:
 
         # block thread for an amount of time
+        logging.debug(f'status loop sleeping for {CHECK_FREQ} seconds...')
         time.sleep(CHECK_FREQ)
+        logging.debug(f'status loop woke up!')
+
 
         # check on status
         message = {'pipeline_uuids': pipeline_list}
@@ -59,7 +63,7 @@ def status_loop(pipeline_list: list):
                     to_delete = []
                     for pipeline_uuid in response_dict.keys():
                         ## TO DO: CODE TO CREATE RESPONSE FOR FRONT END HERE
-                        print(f'{pipeline_uuid} : {response_dict[pipeline_uuid]}')
+                        logging.info(f'pipeline status: {pipeline_uuid} : {response_dict[pipeline_uuid]}')
                         if (response_dict[pipeline_uuid] == 1) or (response_dict[pipeline_uuid] == 3):
                             # failed or completed
                             to_delete.append(pipeline_uuid)
@@ -72,10 +76,13 @@ def status_loop(pipeline_list: list):
                         pipeline_list.remove(pipeline_uuid)
 
                 else:
-                    print(response.text)
+                    logging.error(response.text)
 
 
 def main():
+
+    # initialise logger
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s')
     # create list to keep track of pipelines
     pipelines = list()
 
@@ -93,10 +100,12 @@ def main():
     sock.send(f"NICK {TWITCH_NICKNAME}\n".encode('utf-8'))
     sock.send(f"JOIN {TWITCH_CHANNEL}\n".encode('utf-8'))
     sock.send("CAP REQ :twitch.tv/tags\n".encode('utf-8'))
+    logging.debug("socket connection established")
 
     try:
         while True:
             resp = sock.recv(2048).decode('utf-8')
+            logging.info(f'socket response: {resp}')
             resp_list = resp.split()
 
             if resp.startswith('PING'):
@@ -117,7 +126,7 @@ def main():
                         with mutex:
                             response_uuid = response.json().get('id')
                             pipelines.append(response_uuid)
-                            print(f"appended pipeline with id: {response_uuid}")
+                            logging.info(f"appended pipeline with id: {response_uuid}")
 
     except Exception as e:
         raise
