@@ -44,9 +44,10 @@ def key_required(f):
                                        "please include a key mapped to by 'Authorization'"}) , 401
 
         if key == app.config['SECRET_KEY']:
-            app.logger.debug(f"Authorized request from IP: {request.remote_addr}")
+            app.logger.debug(f"Authorized request from IP: {request.remote_addr}; ACCEPTED")
             return f(*args, **kwargs)
         else:
+            app.logger.debug(f"Unable to authorized request from IP: {request.remote_addr}; REJECTED")
             return jsonify({"message": "Invalid key; you are not authorised to use this service"}), 401
 
     return decorator
@@ -82,6 +83,7 @@ def queue():
 
         # check that data is properly formatted
         if 'link' not in data:
+            app.logger.debug("Rejected queue request: 'link' not provided")
             return jsonify({'message': 'error: please provide a link'}), 400
 
         link = data['link']
@@ -100,11 +102,13 @@ def queue():
 
 
         # response
+        app.logger.info(f"Starting pipeline with id: {pipeline_uuid}")
         return jsonify({'message': 'successfully uploaded file, running AI over music...',
                         'id': pipeline_uuid}), 202
 
     except Exception as e:
         # exception occurred
+        app.logger.exception(e)
         if os.path.isfile(pipeline_file_path):
             os.remove(pipeline_file_path)
         return jsonify({'message': 'error: an error has occurred: ' + str(e)}), 500
