@@ -22,14 +22,15 @@ RUN apt-get update \
 # Copy application code
 COPY ai_api /app
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r /app/api-requirements.txt
+# Install Python dependencies and change owner and give permissions
+RUN pip install --no-cache-dir -r /app/api-requirements.txt && useradd -ms /bin/bash admin && \
+     chown -R admin:admin /app && chmod -R 777 /app
 
 # Copy utilities
 COPY utilities /app/src/utilities
 
 # Change to root user
-USER root
+USER admin
 
 # Expose port
 EXPOSE 8080

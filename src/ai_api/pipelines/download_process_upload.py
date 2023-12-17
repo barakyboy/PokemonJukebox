@@ -11,7 +11,7 @@ import multiprocessing
 import os
 from dotenv import load_dotenv
 from midi2audio import FluidSynth
-from enum import Enum, auto
+from enum import Enum
 
 load_dotenv()
 MIDI_DIR = os.getenv('MIDI_DIR')
@@ -25,6 +25,7 @@ class PipelineStatus(Enum):
     FAILED = 1
     COMPLETE = 2
     QUEUED = 3 # used to denote that the pipeline if queued on the gameboy queue
+
 
 def download_process_upload(link: str, uuid_path: str):
     """
@@ -40,6 +41,7 @@ def download_process_upload(link: str, uuid_path: str):
     audio_abs_path = ''
     ogg_abs_path = ''
     midi_abs_path = ''
+    json_abs_path = ''
 
     try:
         # download video
@@ -112,9 +114,9 @@ def download_process_upload(link: str, uuid_path: str):
             if os.path.isfile(json_abs_path):
                 os.remove(json_abs_path)
 
-        # write failed to uuid file
-        with open(uuid_path, 'w') as fp:
-            fp.write(str(PipelineStatus.FAILED.value))
+            # write failed to uuid file
+            with open(uuid_path, 'w') as fp:
+                fp.write(str(PipelineStatus.FAILED.value))
         raise
 
     finally:

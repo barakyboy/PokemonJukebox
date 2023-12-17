@@ -208,26 +208,30 @@ def check_status():
 
         # check on status of each pipeline_uuid
         response = {}
-        for pipeline_uuid in pipeline_uuids:
-            pipeline_uuid_path = os.path.join(ID_DIR, pipeline_uuid)
-            if os.path.isfile(pipeline_uuid_path):
-                # still exists, open file
-                with open(pipeline_uuid_path, 'r') as fp:
 
-                    # add status of uuid to response
-                    status = int(fp.read())
+        # create mutex
+        mutex = multiprocessing.Lock()
+        with mutex:
+            for pipeline_uuid in pipeline_uuids:
+                pipeline_uuid_path = os.path.join(ID_DIR, pipeline_uuid)
+                if os.path.isfile(pipeline_uuid_path):
+                    # still exists, open file
+                    with open(pipeline_uuid_path, 'r') as fp:
 
-                response[pipeline_uuid] = status
+                        # add status of uuid to response
+                        status = int(fp.read())
 
-                # delete if failed
-                if status == PipelineStatus.FAILED.value:
-                    os.remove(pipeline_uuid_path)
-            else:
+                    response[pipeline_uuid] = status
 
-                # file no longer exists indicating queued
-                response[pipeline_uuid] = PipelineStatus.QUEUED.value
+                    # delete if failed
+                    if status == PipelineStatus.FAILED.value:
+                        os.remove(pipeline_uuid_path)
+                else:
 
-        return jsonify(response), 200
+                    # file no longer exists indicating queued
+                    response[pipeline_uuid] = PipelineStatus.QUEUED.value
+
+            return jsonify(response), 200
 
     except Exception as e:
         # exception occurred

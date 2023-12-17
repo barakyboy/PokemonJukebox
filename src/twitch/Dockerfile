@@ -11,6 +11,9 @@ COPY . /app
 
 RUN pip install -r twitch-service-requirements.txt
 
+# run in unbuffered mode
+ENV PYTHONUNBUFFERED=1
+
 # expose port
 EXPOSE 8080
 

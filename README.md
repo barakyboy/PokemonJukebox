@@ -1,5 +1,5 @@
 # Pokémon Jukebox  
-
+![Gameboy Image](img/gameboy_labled.png) 
 ### Welcome
 Welcome to Pokémon Jukebox!  
 This project is an experiment to see if pokemon can be beaten using the power of music!

@@ -6,6 +6,7 @@ import os
 import requests
 import threading
 import time
+import logging
 
 dotenv.load_dotenv()
 TWITCH_SERVER = os.getenv('TWITCH_SERVER')
@@ -32,6 +33,20 @@ def isMod(badge: str):
 
     return False
 
+def isBroadcaster(badge: str):
+    """
+    Returns true if the badge comes from a moderator or broadcaster
+    :param badge: a badge returned by IRC
+    :return: a boolean value denoting whether the user is a broadcaster
+    """
+    badge_list = badge.split(';')
+    for badge in badge_list:
+        if badge.startswith('badges='):
+            # check whether broadcaster
+            return badge[len('badges='):] == 'broadcaster/1'
+
+    return False
+
 
 def status_loop(pipeline_list: list):
     f"""
@@ -46,7 +61,10 @@ def status_loop(pipeline_list: list):
     while True:
 
         # block thread for an amount of time
+        logging.debug(f'status loop sleeping for {CHECK_FREQ} seconds...')
         time.sleep(CHECK_FREQ)
+        logging.debug(f'status loop woke up!')
+
 
         # check on status
         message = {'pipeline_uuids': pipeline_list}
@@ -57,9 +75,9 @@ def status_loop(pipeline_list: list):
                 if response.status_code == 200:
                     response_dict = response.json()
                     to_delete = []
-                    for pipeline_uuid in response.keys():
+                    for pipeline_uuid in response_dict.keys():
                         ## TO DO: CODE TO CREATE RESPONSE FOR FRONT END HERE
-                        print(f'{pipeline_uuid} : {response_dict[pipeline_uuid]}')
+                        logging.info(f'pipeline status: {pipeline_uuid} : {response_dict[pipeline_uuid]}')
                         if (response_dict[pipeline_uuid] == 1) or (response_dict[pipeline_uuid] == 3):
                             # failed or completed
                             to_delete.append(pipeline_uuid)
@@ -72,10 +90,13 @@ def status_loop(pipeline_list: list):
                         pipeline_list.remove(pipeline_uuid)
 
                 else:
-                    print(response.text)
+                    logging.error(response.text)
 
 
 def main():
+
+    # initialise logger
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG)
     # create list to keep track of pipelines
     pipelines = list()
 
@@ -93,23 +114,27 @@ def main():
     sock.send(f"NICK {TWITCH_NICKNAME}\n".encode('utf-8'))
     sock.send(f"JOIN {TWITCH_CHANNEL}\n".encode('utf-8'))
     sock.send("CAP REQ :twitch.tv/tags\n".encode('utf-8'))
+    logging.debug("socket connection established")
 
     try:
         while True:
             resp = sock.recv(2048).decode('utf-8')
+            logging.info(f'socket response: {resp}')
             resp_list = resp.split()
 
             if resp.startswith('PING'):
                 sock.send("PONG\n".encode('utf-8'))
 
-            elif (resp_list[2] == 'PRIVMSG') and (isMod(resp_list[0])):
-                # this is a message from mod, extract it
-                mod_message = resp_list[4].strip(':')
-                if mod_message.startswith('link: '):
-                    link = mod_message.strip('link: ')
+            elif (resp_list[2] == 'PRIVMSG') and (isMod(resp_list[0]) or isBroadcaster(resp_list[0])):
+                logging.debug("Last received message is from mod or broadcaster")
+                # this is a message from mod or broadcaster, extract it
+                # remove starting semicolon
+                mod_message = resp_list[4][1:]
+                if mod_message.startswith('link:'):
+                    link = mod_message[len('link:'):]
 
                     # send link to ai_api
-                    message = {'link' : link}
+                    message = {'link': link}
                     with requests.post(f'{AI_API_ENDPOINT}/queue',
                                       headers={'Authorization': '{key}'.format(key=AI_API_TOKEN)}, json=message) as response:
 
@@ -117,7 +142,7 @@ def main():
                         with mutex:
                             response_uuid = response.json().get('id')
                             pipelines.append(response_uuid)
-                            print(f"appended pipeline with id: {response_uuid}")
+                            logging.info(f"appended pipeline with id: {response_uuid}")
 
     except Exception as e:
         raise
