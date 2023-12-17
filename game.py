@@ -13,6 +13,7 @@ import requests
 import sys
 import threading
 import time
+import logging
 
 
 load_dotenv()
@@ -26,12 +27,17 @@ def pipeline_manager(q: Queue):
     :param q: the song queue
     """
     while True:
+        try:
+            # block for SLEEP_TIME
+            logging.debug(f"pipeline manager sleeping for {SLEEP_TIME}")
+            time.sleep(SLEEP_TIME)
 
-        # block for SLEEP_TIME
-        time.sleep(SLEEP_TIME)
+            # check for completed pipelines
+            logging.debug(f"pipeline manager woke up! Checking for completed pipelines...")
+            threading.Thread(target=check_save_queue, args=(q,)).start()
 
-        # check for completed pipelines
-        threading.Thread(target=check_save_queue, args=(q,)).start()
+        except Exception as e:
+            logging.exception(e)
 
 
 

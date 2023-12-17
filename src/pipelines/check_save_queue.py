@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from pydub import AudioSegment
 from pydub.playback import play
 import requests
+import logging
 
 load_dotenv()
 PLAYABLE_DIR = os.getenv('PLAYABLE_DIR')
@@ -32,6 +33,7 @@ def check_save_queue(q: Queue):
         with requests.get(f'{API_ENDPOINT}/dequeue',
                           headers={'Authorization': '{key}'.format(key=API_KEY)}) as response:
             if response.status_code != 200:
+                logging.debug(f"Could not dequeue; reason from response: {response.json()['message']}")
                 return
 
             # if got to this point then got a proper response
@@ -40,18 +42,23 @@ def check_save_queue(q: Queue):
             # extract file_id for future reference
             file_id = response_dict.pop('file_id')
 
+            logging.debug(f"Successfully pulled framed_notes data and file_id for file_id {file_id}")
+
             # convert response to framed notes
             fc = FrameConverter()
             framed_notes = fc.dict_to_frame(response_dict)
 
 
         # get file download
-        message = {'file_id' : file_id}
+        message = {'file_id': file_id}
         with requests.post(f'{API_ENDPOINT}/download',
                           headers={'Authorization': '{key}'.format(key=API_KEY)}, json=message) as response:
             if response.status_code != 200:
+                logging.debug(f"Could not download wav with file_id {file_id}\n"
+                              f"reason from response: {response.json()['message']}")
                 return
 
+            logging.debug(f"Successfully downloaded file with file_id: {file_id}")
             # save file
             audio_abs_path = os.path.join(PLAYABLE_DIR, file_id) + '.wav'
             with open(audio_abs_path, 'wb') as file:
@@ -65,8 +72,10 @@ def check_save_queue(q: Queue):
         # add to queue
         q.put((framed_notes, t))
 
+        logging.info(f"Successfully added file_id {file_id} to queue")
+
     except Exception as e:
-        raise
+        logging.exception(e)
 
     finally:
 
@@ -76,7 +85,13 @@ def check_save_queue(q: Queue):
             # delete file on server side
             with requests.post(f'{API_ENDPOINT}/clean',
                                headers={'Authorization': '{key}'.format(key=API_KEY)}, json=message) as response:
-                print(response.text)
+                if response.status_code == 200:
+                    logging.debug("Successfully deleted all files related to this song, both on server and client")
+
+                else:
+                    logging.debug("Successfully deleted all files related to this song, on client, but could not"
+                                  "clean files on server. Reason:\n"
+                                  f"{response.json()['message']}")
 
 
 
