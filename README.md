@@ -4,6 +4,10 @@
 Welcome to Pokémon Jukebox!  
 This project is an experiment to see if pokemon can be beaten using the power of music!
 
+### Demo
+The following video is a demo of the project in action:  
+https://www.youtube.com/watch?v=WyVZ28pBS5o
+
 #### NOTE
 This project is is currently a work-in-progress. The front-end repo
 will be linked here when it goes into production.  
