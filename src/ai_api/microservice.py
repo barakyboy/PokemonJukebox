@@ -127,7 +127,7 @@ def dequeue():
                 return jsonify({'message': 'there are currently no files ready!'}), 202
 
             # if got to this point, file exists; get the associated number and data
-            pipeline_uuid = os.listdir(PROCESSED_DIR)[0]
+            pipeline_uuid = os.listdir(PROCESSED_DIR)[0].strip('.json')
             json_abs_path = os.path.join(PROCESSED_DIR, pipeline_uuid) + ".json"
 
             # return the dictionary version of framed notes, along with name of
