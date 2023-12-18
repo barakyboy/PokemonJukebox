@@ -28,7 +28,7 @@ class PipelineStatus(Enum):
     QUEUED = 3 # used to denote that the pipeline if queued on the gameboy queue
 
 
-def download_process_upload(link: str, uuid_path: str):
+def download_process_upload(link: str, uuid_path: str, pipeline_uuid):
     """
     Takes a youtube link as input and runs AI over it and converts to gameboy inputs.
     Uploads the results to google drive (the framed notes AND .wav file)
@@ -36,6 +36,7 @@ def download_process_upload(link: str, uuid_path: str):
     (list of framed notes, tuple for playing song)
     :param link: a youtube link
     :param uuid_path: a  path of file named with string unique identifier file for pipeline
+    :param pipeline_uuid: the uuid of the pipeline
     """
 
     # assignment for cleanup
@@ -81,22 +82,16 @@ def download_process_upload(link: str, uuid_path: str):
         # get a filename and save files
         mutex = multiprocessing.Lock()
 
+        midi_abs_path = os.path.join(MIDI_DIR, pipeline_uuid) + ".mid"
+        midi_data.write(midi_abs_path)
+
         with mutex:
-            i = 0
-            candidate_path = os.path.join(MIDI_DIR, str(i)) + ".mid"
-            while os.path.isfile(candidate_path):
-                i += 1
-                candidate_path = os.path.join(MIDI_DIR, str(i)) + ".mid"
-
-            midi_abs_path = candidate_path
-            midi_data.write(midi_abs_path)
-
             # convert midi to wav
-            audio_abs_path = os.path.join(PLAYABLE_DIR, str(i)) + ".wav"
+            audio_abs_path = os.path.join(PLAYABLE_DIR, pipeline_uuid) + ".wav"
             fs.midi_to_audio(midi_abs_path, audio_abs_path)
 
             # save framed notes
-            json_abs_path = os.path.join(PROCESSED_DIR, str(i)) + ".json"
+            json_abs_path = os.path.join(PROCESSED_DIR, pipeline_uuid) + ".json"
             with open(json_abs_path, 'w') as json_file:
                 json_file.write(json.dumps(FrameConverter().frame_to_dic(framed_notes)))
 
@@ -104,18 +99,16 @@ def download_process_upload(link: str, uuid_path: str):
             with open(uuid_path, 'w') as fp:
                 fp.write(str(PipelineStatus.COMPLETE.value))
 
-            # log info
-            logging.info(f"Pipeline with file at {uuid_path} completed!")
+        # log info
+        logging.info(f"Pipeline with uuid {pipeline_uuid} completed!")
 
     except Exception as e:
-        logging.exception(e)
+        logging.exception(f"pipeline with uuid {pipeline_uuid} failed due to exception:\n {e}")
         # delete audio file
         mutex = multiprocessing.Lock()
         with mutex:
             if os.path.isfile(audio_abs_path):
                 os.remove(audio_abs_path)
-            if os.path.isfile(midi_abs_path):
-                os.remove(midi_abs_path)
             if os.path.isfile(json_abs_path):
                 os.remove(json_abs_path)
 
@@ -129,5 +122,7 @@ def download_process_upload(link: str, uuid_path: str):
         with mutex:
             if os.path.isfile(ogg_abs_path):
                 os.remove(ogg_abs_path)
+            if os.path.isfile(midi_abs_path):
+                os.remove(midi_abs_path)
 
 

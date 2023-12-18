@@ -48,6 +48,8 @@ def check_save_queue(q: Queue):
             fc = FrameConverter()
             framed_notes = fc.dict_to_frame(response_dict)
 
+            logging.debug(f"Received framed notes: \n {framed_notes}")
+
 
         # get file download
         message = {'file_id': file_id}

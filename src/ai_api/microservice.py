@@ -98,7 +98,7 @@ def queue():
         with open(pipeline_file_path, 'w') as file:
             file.write(str(PipelineStatus.RUNNING.value))
 
-        multiprocessing.Process(target=download_process_upload, args=(link, pipeline_file_path)).start()
+        multiprocessing.Process(target=download_process_upload, args=(link, pipeline_file_path, pipeline_uuid)).start()
 
 
         # response
@@ -127,20 +127,20 @@ def dequeue():
                 return jsonify({'message': 'there are currently no files ready!'}), 202
 
             # if got to this point, file exists; get the associated number and data
-            i = os.listdir(PROCESSED_DIR)[0].strip(".json")
-            json_abs_path = os.path.join(PROCESSED_DIR, str(i)) + ".json"
+            pipeline_uuid = os.listdir(PROCESSED_DIR)[0].strip('.json')
+            json_abs_path = os.path.join(PROCESSED_DIR, pipeline_uuid) + ".json"
 
             # return the dictionary version of framed notes, along with name of
             with open(json_abs_path, 'r') as json_file:
                 dict_framed_notes = json.load(json_file)
 
                 # add file id for file download
-                dict_framed_notes['file_id'] = i
+                dict_framed_notes['file_id'] = pipeline_uuid
 
                 # remove json file so that can dequeue other songs
                 os.remove(json_abs_path)
 
-                app.logger.info(f"Successfully dequeued framed notes and file_id {i}")
+                app.logger.info(f"Successfully dequeued framed notes and file_id {pipeline_uuid}")
                 return jsonify(dict_framed_notes), 200
 
         except Exception as e:
@@ -186,15 +186,17 @@ def clean():
             return jsonify({'message': 'error: please provide a file_id'}), 400
 
         file_id = data['file_id']
+
+        # remove the audio file and pipeline file
         audio_abs_path = os.path.join(PLAYABLE_DIR, file_id) + ".wav"
-        midi_abs_path = os.path.join(MIDI_DIR, file_id) + ".mid"
+        uuid_abs_path = os.path.join(ID_DIR, file_id)
 
         # delete files
         os.remove(audio_abs_path)
-        os.remove(midi_abs_path)
+        os.remove(uuid_abs_path)
 
-        app.logger.info(f"successfully deleted {audio_abs_path} and {midi_abs_path}")
-        return jsonify({"message": "successfully deleted all files"}), 200
+        app.logger.info(f"successfully deleted wav and pipeline files for pipeline: {file_id}")
+        return jsonify({"message": f"successfully deleted all files for pipeline {file_id}"}), 200
 
     except Exception as e:
         # exception occurred

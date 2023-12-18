@@ -76,8 +76,7 @@ def main():
     # instantiate game
     with PyBoy(GAME_PATH) as pyboy:
 
-        # initial wait for pyboy graphic to end
-        time.sleep(10)
+        pyboy.set_emulation_speed(target_speed=1)
 
         # initialise pitch controller
         pitch_controller = PitchControl()
