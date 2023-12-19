@@ -162,3 +162,5 @@ cython_debug/
 # ignore all assets
 assets/
 
+# ignore .idea
+.idea/
